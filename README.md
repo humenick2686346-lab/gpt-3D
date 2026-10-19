@@ -1,19 +1,21 @@
-# 东京塔 · 时光花海
+# 樱梦浮岛 · 富士花境
 
-**Tokyo Tower: Sea of Flowers** — 可交互、可离线运行的程序化 3D 网页。约 333 米高的红白东京塔、实例化郁金香 / 薰衣草 / 波斯菊、连续昼夜、晴雨雪、可导出的 GLB 模型。所有美术与环境音均由代码生成，无付费 API、外部模型、贴图、字体或音频资源。
+**Sakura Dream — Floating Island 3.1** 是一个可实时探索、可完全离线运行的原创日式幻想 3D 微缩世界。约 20 × 18 相对单位的悬浮岛中，集中布置了富士山、湖泊与溪流、三条瀑布、九座日式建筑、两座拱桥、两座鸟居、29 棵樱花树，以及最多 16,500 株具有花瓣、花心、花茎和叶片的实例化花卉。
 
-[完整交付 ZIP](downloads/v1.0.0/tokyo-tower-complete.zip) · [离线体验 ZIP](downloads/v1.0.0/tokyo-tower-offline.zip) · [独立 HTML](downloads/v1.0.0/tokyo-tower-offline.html) · [东京塔 GLB](downloads/v1.0.0/tokyo-tower-333m.glb)
+项目使用 Three.js、TypeScript、WebGL 与 GLSL 程序化生成全部模型、材质和动画。没有远程模型、贴图、字体、音频、CDN、付费 API 或游戏专有资产。用户提供的图片仅用于构图与风格研究，没有被打包为背景或贴图。
 
-## 本地运行
+![樱梦浮岛英雄视角](docs/preview.webp)
 
-需要 **Node.js 22.12+ 或 24+**，以及支持 WebGL 2 的现代浏览器。
+## 立即运行
+
+开发环境需要 Node.js 22.12+ 或 24+：
 
 ```sh
 npm ci
 npm run dev
 ```
 
-打开终端显示的本地地址。开发服务器用于编辑与热更新；要验证全部下载功能，请先构建，再运行预览：
+验证正式构建与页面内下载功能：
 
 ```sh
 npm test
@@ -21,105 +23,103 @@ npm run build
 npm run preview
 ```
 
-若云环境的默认 npm 缓存目录不可写，使用 `npm ci --cache /tmp/tokyo-npm-cache`。
+构建后的在线网站位于 `dist/`，完整交付文件位于 `release/`。仓库中的 [downloads/v3.1.0](downloads/v3.1.0) 是已经生成并验证的固定版本快照，无需本地构建即可下载。
+
+## 场景内容
+
+- 约 20 × 18 单位的不规则椭圆浮岛，默认镜头完整呈现地表和厚重岩石底座。
+- 后方比例受控的雪顶富士山；中后方青蓝湖泊、小岛与蜿蜒溪流。
+- 前景和两侧为连续花毯，包含郁金香、薰衣草、波斯菊、黄色小菊与幻想花卉。
+- 3 座主要神社 / 塔楼、6 座小屋 / 凉亭、2 座鸟居、2 座木拱桥、木平台、栏杆、石灯笼和纵横石板路。
+- 29 棵不同大小的樱花树；每棵包含分枝、分层花冠与独立花瓣簇。
+- 三条几何瀑布、动态流水 Shader 和下方水雾粒子；岩壁包含尖锐悬垂岩块、苔藓和垂藤。
+- Toon / NPR 明暗分区、手绘颗粒、柔和 Bloom、昼夜星空、花海风动、花瓣与云层动画。
 
 ## 操作
 
 | 控制 | 作用 |
 | --- | --- |
-| 左键拖动 / 单指拖动 | 平滑环绕旋转 |
-| 滚轮 / 双指捏合 | 缩放，有距离限制 |
-| 右键拖动 / 双指拖动 | 平移，有场景边界与地面 / 塔体避让 |
-| 全景 / 仰视 / 近景 | 平滑切换三个预设视角 |
-| 复位 / `R` | 恢复全景视角 |
-| 时间进度条 | 任意选择 00:00—24:00；拖动会暂停自动播放 |
-| 播放 / 空格 | 约 4 分钟走完 24 小时，循环播放 |
-| 晴天 / 下雨 / 下雪 | 互斥天气，与时间独立，立即更新 |
-| 天气强度 | 调整雨雪密度与雾；雨量、雪量分别记忆，0% 关闭粒子 |
-| 音量按钮 | 开启 / 静音程序化环境声，默认静音 |
-| 沉浸模式 / `H` | 隐藏 / 显示 UI，右上角保留恢复按钮 |
-| 全屏按钮 | 浏览器全屏；不支持时给出提示，可改用沉浸模式 |
-| 收藏这一刻 | 下载离线包、源码 ZIP 或 GLB 模型 |
-| `Escape` | 关闭下载窗口；窗口关闭时恢复 UI |
+| 鼠标左键拖动 | 平滑旋转视角 |
+| 滚轮 | 缩放，带合理限制 |
+| 鼠标右键拖动 | 平移，目标限制在岛屿范围内 |
+| 正面 / 俯视 / 侧面 | 切换三个参考视角 |
+| 复位 / `R` | 回到斜俯视英雄镜头 |
+| 环绕 | 开启或暂停慢速自动环绕 |
+| 时间滑块 | 连续选择 00:00—24:00；手动拖动会暂停自动播放 |
+| 播放 / 空格 | 约四分钟循环一天 |
+| 晴 / 雨 / 雪 | 独立于时间切换天气；雨雪强度分别记忆 |
+| 画质 | 低 / 中 / 高三档实例密度、天气粒子、阴影、Bloom 与分辨率上限 |
+| 隐藏界面 / `H` | 进入或离开纯净观赏模式 |
+| 全屏 | 进入或退出浏览器全屏 |
+| 收藏这座岛 | 下载独立 HTML、Windows 离线包或可编辑源码 |
 
-画质低 / 中 / 高分别采用 **6,500 / 15,000 / 28,000** 株精细实例花卉，另有 **18,000 / 40,000 / 65,000** 个远景花簇；天气粒子上限 **1,800 / 4,200 / 7,600**，实际数目乘以强度。低画质禁用阴影，中 / 高为 1024 / 2048 阴影图，像素比上限为 1 / 1.5 / 2。移动设备默认低画质。初始自动画质若持续低于 24 FPS，会降为低画质；用户手动选择后保持选择。
+低、中、高画质分别显示约 6,500 / 11,000 / 16,500 株立体花卉，天气粒子上限为 850 / 1,600 / 2,600。花卉始终使用 `InstancedMesh`；建筑、道路、崖壁和藤蔓按材质合并。渲染分辨率会根据最近帧率在用户选定档位内自适应调整，最低降至 65%。
 
-## 下载与离线交付
+## Windows 离线版
 
-仓库的 `downloads/v1.0.0/` 目录提供实际生成的版本快照：完整交付 ZIP、独立 HTML、GLB 模型和许可证。无需先构建即可下载保存。它是固定版本的交付文件，`npm run build` 会更新下述 `release/` 产物，不会改写已提交的版本快照。
-
-`npm run build` 实际生成以下文件：
+`npm run build` 生成：
 
 | 文件 | 用途 |
 | --- | --- |
-| `dist/` | 可部署到静态托管的完整网站，含下载资源 |
-| `release/tokyo-tower-complete.zip` | 完整交付：源码、锁文件、说明、许可证、可直接打开的 `offline/index.html` |
-| `release/tokyo-tower-source.zip` | 可编辑的项目源代码，依赖由 `npm ci` 安装 |
-| `release/tokyo-tower-offline.html` | 自包含单文件，双击即可运行，无网络请求 |
-| `release/tokyo-tower-offline.zip` | 独立 HTML、中文离线说明与第三方许可证 |
-| `release/THIRD_PARTY_LICENSES.txt` | 第三方依赖许可证 |
+| `release/sakura-dream-offline.html` | 资源完整内嵌的独立网页，优先双击打开 |
+| `release/sakura-dream-offline.zip` | 独立网页、中文说明、许可证和 Windows 本地启动器 |
+| `release/sakura-dream-complete.zip` | 完整源码与离线版的总交付包 |
+| `release/sakura-dream-source.zip` | 可编辑源代码和固定依赖锁文件 |
+| `release/THIRD_PARTY_LICENSES.txt` | 第三方依赖许可证原文 |
 
-离线 HTML 内嵌完整运行代码和源码归档，可在 `file://` 下继续下载源码、离线 ZIP 和 GLB。无需安装 Node.js。浏览器如果限制本地文件的全屏或音频，可用沉浸模式，或执行 `python3 -m http.server 8080 --directory dist` 通过 HTTP 打开网站。
+普通用户不需要安装 Node.js、Python 或专业 3D 软件。解压离线 ZIP 后，先双击 `index.html`。如果浏览器组织策略限制 `file://`，双击 `start-local.cmd`；它只使用 Windows 内置 PowerShell，在随机空闲端口监听 `127.0.0.1`，不会联网、修改系统执行策略或请求管理员权限。关闭命令窗口即可停止。
 
-**GLB** 通过 Three.js `GLTFExporter` 在浏览器内真实生成，Y 轴向上，1 单位≈1 米。文件包含合并的红白钢架、塔脚、观景平台、窗户、设备、天线、静态材质。**不包含**花海、天空、雨雪、地形、交互 UI、音频和动态昼夜照明。塔身是参考东京塔轮廓与高度的程序化艺术近似，并非建筑测绘模型。
+离线 HTML 内嵌全部场景代码、Shader、UI、许可证和项目源码归档。断网状态下仍可拖动时间、切换雨雪、操作镜头，并再次下载离线包与源码。
 
-## 部署到 GitHub Pages
+## GitHub Pages
 
-仓库已提供 `.github/workflows/pages.yml`。在 GitHub 仓库 **Settings → Pages → Source** 选择 **GitHub Actions**。代码进入 `main` 后，或在 Actions 手动运行工作流，将测试、构建并发布 `dist`。构建任务另上传 `tokyo-tower-downloads` 制品，包含完整 ZIP 和离线 HTML。通过部署任务实际生成的 HTTPS 地址访问；本文不把尚未执行的部署视为已上线。
+仓库包含 [.github/workflows/pages.yml](.github/workflows/pages.yml)。在 GitHub 仓库 **Settings → Pages → Source** 选择 **GitHub Actions**；推送到 `main` 或手动运行工作流后，会执行核心测试、构建 `dist/` 并部署静态网站，同时上传完整发布包制品。
 
-Vite 使用 `base: './'`，兼容仓库子路径。其他静态托管平台的构建命令为 `npm ci && npm run build`，输出目录为 `dist`。无需后端或密钥。
+Vite 使用相对 `base`，可部署到 GitHub Pages 仓库子路径。其他静态托管的构建命令为 `npm ci && npm run build`，输出目录为 `dist`；不需要后端、数据库、环境变量或密钥。
 
 ## 验证
 
 ```sh
-npm test              # 连续太阳周期、时间边界、确定性地形 / 随机分布、333m 真实几何
-npm run build        # 标准网站 + 单文件离线版 + ZIP 交付
-npm run test:browser # 构建后执行，使用本机 Chromium 或 Playwright Chromium
+npm test
+npm run build
+npm run test:browser
 ```
 
-浏览器测试会启动预览服务器，检查实际 WebGL 场景、昼夜切换、雨雪与强度、自动播放和手动暂停、相机旋转缩放 / 预设 / 复位、沉浸模式、画质、GLB 内容、ZIP 内容及断网离线版，并保存桌面 / 手机截图和报告至 `test-results/`。无系统 Chromium 时先执行 `npx playwright install chromium`；可通过 `CHROMIUM_PATH` 指定已有浏览器。
+核心测试检查连续昼夜、时间端点、20 × 18 岛屿边界、岩石厚度、富士山比例、可种植覆盖率、确定性分布、实例花卉、29 棵树和完整建筑数量。
 
-云端 Chromium 的管理策略禁止 `file://` 导航。测试会记录该限制，在全禁网的 `about:blank` 中加载原始独立 HTML，验证渲染和离线包再次下载 / 再加载；不禁用管理策略。真实 Windows 浏览器的双击打开仍需实机确认。
+浏览器测试使用真实 WebGL 页面检查英雄构图、昼夜、雨雪与地表响应、跨午夜播放、四个镜头、鼠标旋转 / 缩放 / 平移、慢速环绕、三档画质、全屏、隐藏 UI、1920 × 1080 尺寸、实际下载文件内容、断网单文件运行、离线雨雪与镜头，以及 WebGL 上下文丢失提示。报告和截图写入 `test-results/`；本次结果见 [验证记录](docs/VALIDATION.md)。
 
-性能数字从真实渲染循环采样，当前帧率显示在页脚，诊断可读取 `window.__TOKYO__.snapshot()`。普通电脑目标 60 FPS、移动端目标 30 FPS，但 GPU、屏幕像素与浏览器差异很大，**不保证固定帧率**。软件 WebGL 自动化结果不代表真实 Windows / Android GPU 性能。
+云环境的 Chromium 管理策略禁止 `file://` 导航，所以自动化在全禁网浏览器上下文的 `about:blank` 中加载完全相同的独立 HTML，并确认没有任何 HTTP 请求。实际 Windows 双击和 `start-local.cmd` 仍需要 Windows 实机复核。
 
-本次交付的执行结果、约 1 FPS 的云端软件渲染采样以及未验证范围详见 [验证记录](docs/VALIDATION.md)。
+云环境只有 SwiftShader 软件 WebGL，1920 × 1080 低画质采样约 0.7 FPS，不能代表真实独立显卡，也不能据此宣称达到 60 FPS。页面已经采用低绘制调用、实例化、合并几何、花卉近景细节切换、自适应像素比和按需阴影更新；真实 Windows GPU 性能仍需设备测试。
 
-## 文件结构
+## 源码结构
 
 ```text
 src/
-  main.js                 # 场景装配、状态、事件、渲染循环、资源释放
-  style.css               # 响应式玻璃 UI、手机与横屏布局
-  core/math.js            # 确定性随机、地形、小径、时间格式
-  scene/
-    tower.js              # 合并钢梁几何、双层观景台、天线、积雪层
-    flowers.js            # 三类实例化花卉与 GLSL 风动
-    ground.js             # 起伏地形、小径、远山、湿润与积雪
-    sky.js                # 连续天空、太阳 / 月亮、程序云层、星空
-  systems/
-    time.js               # 24 小时连续光照、雾色、塔灯
-    weather.js            # 世界空间雨线、风驱雪粒子
-    camera.js             # OrbitControls、相机预设、碰撞边界
-    audio.js              # 用户主动开启的程序化环境音
-    downloads.js          # GLB、离线 ZIP、源码下载
-  ui/
-    interface.js          # 语义化界面与状态同步
-    icons.js              # 内嵌 SVG 图标
-scripts/package.mjs       # 单文件嵌入、许可证与发布包
-tests/                    # 核心测试、端到端浏览器测试
-downloads/v1.0.0/          # 已生成、可下载的离线网页 / 完整 ZIP / GLB 版本快照
-.github/workflows/        # Pages 构建发布
+  main.ts                        # 场景装配、状态、后期处理、渲染循环与释放
+  world/
+    Island.ts                    # 20 × 18 地表、岩石底座、石路、悬藤
+    Mountain.ts                  # 富士山脊与程序雪线
+    Vegetation.ts                # 实例花海、风动、樱花枝干与花簇
+    Architecture.ts              # 神社、木屋、瓦顶、鸟居、桥、灯笼
+    Water.ts                     # 湖泊、溪流、三条瀑布与水雾
+    Environment.ts               # 天空、云层、灯光与雾
+    Weather.ts                   # 世界空间雨、雪与樱花花瓣
+    materials.ts / layout.ts     # NPR 材质、合批、统一空间布局
+  controllers/
+    TimeController.ts            # 24 小时连续插值
+    CameraController.ts          # 正交微缩镜头、取景与 OrbitControls
+    Downloads.ts                 # 独立 HTML、离线 ZIP 与源码下载
+  ui/UI.ts / style.css           # 桌面幻想风格控制界面
+scripts/package.mjs              # 单文件嵌入、许可证和发布包
+scripts/start-local.cmd          # 无额外依赖的 Windows 本地服务
+tests/                           # 核心测试与浏览器端到端测试
 ```
 
-## 视觉与技术边界
+## 技术边界与许可证
 
-- 天空、太阳方向、光色、影长、半球环境光、雾色、月光、星空与塔灯随时间连续变化。晴天日出约 05:30、日落约 19:30，为艺术化固定周期，不计算季节天文数据。
-- 花海采用实例化而非逐株独立对象；近景有花瓣 / 花杯 / 花穗 / 茎叶几何。远景采用十个三角形的花簇，着色器按距离渐变精细花卉与花簇的几何尺寸，衔接地表色带与雾。按画质降低植被密度，合并塔身重复构件；只有静态塔体投影，缓存阴影图并在时间、天气或画质变化时更新，没有逐株动态阴影。
-- 雨天使用真实 3D 雨线，地面粗糙度 / 金属度与浅水洼变化；采用环境反射与清漆高光，**不使用屏幕空间反射或物理水模拟**。雪天为不同速度和尺寸的粒子、冷雾、地面混色及平台雪帽，不是逐帧累积的真实积雪模拟。
-- 页面尺寸改变时更新相机与渲染器；图形上下文丢失有明确提示；页面退出释放几何、材质、实例缓冲、音频、阴影与渲染器。
-- 自动化验证覆盖桌面和触屏仿真；真实 Windows 电脑、Android / iOS 机型仍需设备实测。WebGL 2 不可用时显示错误提示。
-
-## 许可证
-
-项目源码为 [MIT](LICENSE)。Three.js、fflate 等依赖保留各自许可证，构建生成 `THIRD_PARTY_LICENSES.txt`。无第三方美术素材。项目为独立创意作品，与东京塔运营方无隶属关系。
+- 水面和瀑布为实时 Shader 与几何动画，不是流体模拟；雨天增加波纹和湿润着色，雪天改变朝上表面颜色，不执行逐帧物理积雪。
+- 环境反射是艺术化水面高光；没有屏幕空间反射、光线追踪或实时全局光照。
+- 场景为程序化原创艺术近似，不是富士山、神社或参考图片的测绘复刻。
+- 项目源码为 [MIT](LICENSE)。Three.js、fflate、Vite、Playwright 等依赖保留各自许可证。

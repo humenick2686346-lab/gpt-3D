@@ -3,8 +3,8 @@ import path from 'node:path';
 import { zipSync, strToU8 } from 'fflate';
 
 const root=process.cwd();
-const packages=['three','fflate','vite','vite-plugin-singlefile','@playwright/test'];
-let licenses='Tokyo Tower · Sea of Flowers — third-party notices\n\nAll scene assets are generated procedurally. No external model, image, font or audio assets are used.\n\n';
+const packages=['three','fflate','vite','vite-plugin-singlefile','@playwright/test','typescript','@types/three'];
+let licenses='Sakura Dream · Floating Island — third-party notices\n\nAll scene assets are generated procedurally. No external model, image, font or audio assets are used.\n\n';
 for(const name of packages) {
   const base=path.join(root,'node_modules',name);
   const pkg=JSON.parse(await readFile(path.join(base,'package.json'),'utf8'));
@@ -32,22 +32,23 @@ async function collect(dir='') {
 await collect();
 source['THIRD_PARTY_LICENSES.txt']=strToU8(licenses);
 const sourceZip=zipSync(source,{level:9});
-await writeFile('release/tokyo-tower-source.zip',sourceZip);
+await writeFile('release/sakura-dream-source.zip',sourceZip);
 let offline=await readFile('dist-offline/index.html','utf8');
 offline=offline.replace('<html lang="zh-CN">','<html lang="zh-CN" data-offline="true">');
 if(!offline.includes('data-offline="true"'))throw new Error('Offline marker injection failed');
 const embedded=`<script id="project-source" type="application/octet-stream">${Buffer.from(sourceZip).toString('base64')}</script>\n<script id="third-party-licenses" type="text/plain">${licenses.replace(/<\/script/gi,'<\\/script')}</script>`;
 offline=offline.replace('</head>',`${embedded}\n</head>`);
 await writeFile('dist-offline/index.html',offline);
-await writeFile('release/tokyo-tower-offline.html',offline);
+await writeFile('release/sakura-dream-offline.html',offline);
 const instructions=await readFile('OFFLINE.txt','utf8');
-const offlineZip=zipSync({'index.html':strToU8(offline),'README-OFFLINE.txt':strToU8(instructions),'THIRD_PARTY_LICENSES.txt':strToU8(licenses)},{level:9});
-await writeFile('release/tokyo-tower-offline.zip',offlineZip);
-await copyFile('release/tokyo-tower-offline.html','dist/offline.html');
-await copyFile('release/tokyo-tower-source.zip','dist/tokyo-tower-source.zip');
-await copyFile('release/tokyo-tower-offline.zip','dist/tokyo-tower-offline.zip');
+const launcher=await readFile('scripts/start-local.cmd','utf8');
+const offlineZip=zipSync({'start-local.cmd':strToU8(launcher),'index.html':strToU8(offline),'README-OFFLINE.txt':strToU8(instructions),'THIRD_PARTY_LICENSES.txt':strToU8(licenses)},{level:9});
+await writeFile('release/sakura-dream-offline.zip',offlineZip);
+await copyFile('release/sakura-dream-offline.html','dist/offline.html');
+await copyFile('release/sakura-dream-source.zip','dist/sakura-dream-source.zip');
+await copyFile('release/sakura-dream-offline.zip','dist/sakura-dream-offline.zip');
 await copyFile('release/THIRD_PARTY_LICENSES.txt','dist/THIRD_PARTY_LICENSES.txt');
 // A complete delivery includes both editable source and the ready-to-open offline app.
-const delivery=zipSync({...source,'offline/index.html':strToU8(offline),'offline/README.txt':strToU8(instructions)},{level:9});
-await writeFile('release/tokyo-tower-complete.zip',delivery);
+const delivery=zipSync({...source,'offline/start-local.cmd':strToU8(launcher),'offline/index.html':strToU8(offline),'offline/README.txt':strToU8(instructions)},{level:9});
+await writeFile('release/sakura-dream-complete.zip',delivery);
 console.log(`Packaged ${Object.keys(source).length} source files; offline HTML ${(Buffer.byteLength(offline)/1024).toFixed(0)} KiB; complete ZIP ${(delivery.length/1024).toFixed(0)} KiB.`);

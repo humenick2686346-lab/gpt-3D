@@ -22,7 +22,7 @@ export function createSky() {
       void main(){
         vec3 d=normalize(vDirection);
         float height=max(d.y,0.);
-        vec3 color=mix(horizonColor,topColor,pow(smoothstep(-.08,.85,d.y),.58));
+        vec3 color=mix(horizonColor,topColor,pow(smoothstep(-.95,.55,d.y),.58));
         float sunDot=max(dot(d,sunDirection),0.);
         color+=vec3(1.,.57,.24)*pow(sunDot,12.)*.23*daylight*(1.-cloudCover);
         color+=vec3(1.,.78,.47)*smoothstep(.99972,.99988,sunDot)*daylight*3.*(1.-cloudCover);

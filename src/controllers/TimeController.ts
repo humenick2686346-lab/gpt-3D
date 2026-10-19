@@ -1,0 +1,4 @@
+import {smooth,clamp,type Weather} from '../world/layout.ts';
+export function calculateTime(hour:number){const h=((hour%24)+24)%24;const solar=h<5.5?h+24:h;const angle=solar<=19.5?(solar-5.5)/14*Math.PI:Math.PI+(solar-19.5)/10*Math.PI;const elevation=Math.sin(angle);return {hour:h,angle,elevation,daylight:smooth(-.17,.24,elevation),night:1-smooth(-.19,.12,elevation),golden:(1-smooth(.12,.72,elevation))*smooth(-.17,.24,elevation)};}
+export function formatTime(hour:number){const m=Math.round(clamp(hour,0,24)*60);return `${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`;}
+export class TimeController{hour=10.5;playing=false;set(hour:number){this.hour=clamp(hour,0,24);this.playing=false;}update(delta:number){if(this.playing)this.hour=(this.hour+delta*.1)%24;return calculateTime(this.hour);}}

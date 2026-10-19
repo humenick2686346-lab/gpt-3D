@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [{
     name: 'local-delivery-files',
     configureServer(server) {
-      const types={'offline.html':'text/html; charset=utf-8','tokyo-tower-source.zip':'application/zip','THIRD_PARTY_LICENSES.txt':'text/plain; charset=utf-8'};
+      const types={'offline.html':'text/html; charset=utf-8','sakura-dream-source.zip':'application/zip','THIRD_PARTY_LICENSES.txt':'text/plain; charset=utf-8'};
       server.middlewares.use(async(req,res,next)=>{
         const name=new URL(req.url,'http://localhost').pathname.slice(1);
         if(!Object.hasOwn(types,name))return next();

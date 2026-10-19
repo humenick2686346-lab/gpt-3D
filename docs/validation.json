@@ -1,89 +1,69 @@
 {
+  "started": "2026-10-19T14:27:36.148Z",
   "browser": "154.0.8037.57",
-  "started": "2026-10-18T15:14:52.536Z",
   "checks": [
-    "actual WebGL rendering and metre-scale tower",
-    "sunlight, night, endpoints and continuous time controls",
-    "independent night rain, intensity and snow switching",
-    "play advances time and slider input pauses playback",
-    "camera presets, reset, mouse orbit and zoom",
-    "all three quality presets change actual instance counts",
-    "immersive UI and opt-in audio controls",
-    "fullscreen control enters and exits when supported",
-    "real GLB model export contains geometry and valid binary buffers",
-    "offline ZIP and complete editable source downloads",
-    "offline file runs with all network access disabled and re-downloads work",
-    "mobile layout, real touch orbit and resizing"
+    "real WebGL diorama with dense planting and complete architecture",
+    "hero composition contains island rim, Fuji and deep rock underside",
+    "continuous day-night controls and exact endpoints",
+    "independent rain, snow, ground response and remembered intensity",
+    "automatic cycle crosses midnight and manual scrubbing pauses it",
+    "front, top, side and reset cameras render detailed geometry",
+    "mouse orbit, zoom, pan and slow automatic orbit",
+    "quality presets change actual instance and weather budgets",
+    "fullscreen, hidden UI and viewport resize",
+    "actual self-contained HTML, complete offline ZIP and editable source downloads",
+    "zero-network standalone rendering with day, rain, snow and camera interactions"
   ],
   "errors": [],
   "performance": [
     {
-      "viewport": "desktop 1280x800, low quality, SwiftShader",
-      "time": 17.25,
-      "playing": false,
+      "viewport": "1920x1080; low; SwiftShader",
       "weather": "sun",
       "intensity": 0.65,
       "quality": "low",
       "uiVisible": true,
-      "fps": 1,
-      "elapsed": 155.39560000000014,
-      "flowers": 6500,
-      "rainVisible": false,
-      "snowVisible": false,
-      "particleCount": 0,
-      "towerHeight": 333,
-      "sunIntensity": 2.8,
-      "night": 0,
-      "camera": [
-        265.9742461579659,
-        194.3992387740023,
-        574.6611509629224
-      ],
-      "target": [
-        0,
-        130,
-        0
-      ],
-      "drawCalls": 33,
-      "triangles": 812013,
-      "renderer": "WebKit WebGL"
-    },
-    {
-      "viewport": "touch emulation 390x844, low quality, SwiftShader",
-      "time": 18.25,
+      "time": 10.5,
       "playing": false,
-      "weather": "sun",
-      "intensity": 0.65,
-      "quality": "low",
-      "uiVisible": true,
-      "fps": 1,
-      "elapsed": 50.23189999999995,
-      "flowers": 6500,
-      "rainVisible": false,
-      "snowVisible": false,
-      "particleCount": 0,
-      "towerHeight": 333,
-      "sunIntensity": 2.8,
       "night": 0,
+      "sunIntensity": 2.6,
+      "elapsed": 179.4566999999972,
+      "fps": 0.7,
+      "dpr": 0.65,
+      "flowers": 6498,
+      "trees": 29,
+      "buildings": 9,
+      "largeBuildings": 3,
+      "smallBuildings": 6,
+      "bridges": 2,
+      "torii": 2,
+      "waterfalls": 3,
+      "drawCalls": 42,
+      "triangles": 1590708,
       "camera": [
-        369.0565232215955,
-        159.17752156924615,
-        517.7445202920281
+        16.855983890530542,
+        13.917050575833354,
+        29.619006707152693
       ],
       "target": [
-        -0.03591807156894442,
-        130,
-        0.014434228519460133
+        0.23055514048602718,
+        -1.2117826536234597,
+        0.4691606699524679
       ],
-      "drawCalls": 28,
-      "triangles": 810213,
+      "zoom": 1,
+      "view": "hero",
+      "orbit": false,
+      "rainVisible": false,
+      "snowVisible": false,
+      "particles": 0,
+      "snowCover": 0,
+      "wetness": 0,
       "renderer": "WebKit WebGL"
     }
   ],
   "limitations": [
-    "Headless Linux SwiftShader is not a Windows or Android hardware benchmark.",
-    "Cloud Chromium enterprise policy blocks file:// navigation; the exact standalone HTML was instead loaded into about:blank with networking disabled. Double-click opening needs validation on an unmanaged browser."
+    "Linux SwiftShader cannot establish Windows discrete-GPU performance. Windows launcher execution is not available in this environment.",
+    "Enterprise Chromium blocks file://. The exact standalone HTML was loaded into about:blank in an offline browser context; actual Windows file opening remains unverified."
   ],
   "success": true,
-  "finished": "2026-10-18T15:19:01.258Z"
+  "finished": "2026-10-19T14:34:33.422Z"
 }

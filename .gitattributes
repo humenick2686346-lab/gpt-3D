@@ -2,3 +2,7 @@ downloads/v1.0.0/*.zip binary
 downloads/v1.0.0/*.glb binary
 downloads/v1.0.0/*.html -diff -merge -text linguist-generated=true
 downloads/v1.0.0/THIRD_PARTY_LICENSES.txt -text -whitespace linguist-vendored=true
+downloads/v3.1.0/*.zip binary
+downloads/v3.1.0/*.html -diff -merge -text linguist-generated=true
+downloads/v3.1.0/THIRD_PARTY_LICENSES.txt -text -whitespace linguist-vendored=true
+docs/preview.webp binary
