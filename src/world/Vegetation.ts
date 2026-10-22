@@ -1,7 +1,7 @@
 import * as T from 'three';
 import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
 import {Batch,mats,toon,colored} from './materials.ts';
-import {random,height,plantable,trees,qualityConfig,type Quality} from './layout.ts';
+import {random,height,plantable,trees,qualityConfig,islandRadiusX,islandRadiusZ,type Quality} from './layout.ts';
 function flowerGeometry(kind:number,detail=false){
  const parts:T.BufferGeometry[]=[];
  const add=(g:T.BufferGeometry,c:string,p:number[],s=[1,1,1],r=[0,0,0])=>{colored(g,c);g.applyMatrix4(new T.Matrix4().compose(new T.Vector3(...p),new T.Quaternion().setFromEuler(new T.Euler(...r)),new T.Vector3(...s)));parts.push(g);};
@@ -17,23 +17,24 @@ function blossomGeometry(){
 }
 export class Vegetation {
  group=new T.Group();flowers:T.InstancedMesh[]=[];count=0;quality:Quality;cherryCount=trees.length;
- constructor(quality:Quality){this.group.name='Flower carpets and 29 cherry trees';this.quality=quality;this.createTrees();this.createFlowers();this.setQuality(quality);}
+ constructor(quality:Quality){this.group.name=`Flower carpets and ${trees.length} cherry trees`;this.quality=quality;this.createTrees();this.createFlowers();this.setQuality(quality);}
  createFlowers(){
   const rng=random(3401),max=qualityConfig.high.flowers,positions:{x:number,z:number,scale:number,kind:number,c:T.Color}[]=[];
   const palette=['#ec79ab','#b79ce4','#f3c864','#f4e7d7','#ea9d6b','#da68a1'];
-  let attempts=0;while(positions.length<max&&attempts++<max*8){const x=(rng()-.5)*20,z=(rng()-.5)*17.2;if(!plantable(x,z))continue;const band=Math.floor((x+z*.65+1.2*Math.sin(z*.8)+24)/2.2)%6;const kind=band===1?1:band===2?3:band===3?2:0;positions.push({x,z,kind,scale:.8+rng()*.6,c:new T.Color(palette[band]).multiplyScalar(.85+rng()*.23)});}
+  let attempts=0;while(positions.length<max&&attempts++<max*8){const x=(rng()-.5)*islandRadiusX*2,z=(rng()-.5)*islandRadiusZ*2;if(!plantable(x,z))continue;const band=Math.floor((x+z*.65+1.2*Math.sin(z*.8)+24)/2.2)%6;const kind=band===1?1:band===2?3:band===3?2:0;positions.push({x,z,kind,scale:.8+rng()*.6,c:new T.Color(palette[band]).multiplyScalar(.85+rng()*.23)});}
   const dummy=new T.Object3D();for(let k=0;k<4;k++){const selected=positions.filter(p=>p.kind===k);const mesh=new T.InstancedMesh(flowerGeometry(k),toon('#ffffff',true,true),selected.length);selected.forEach((p,i)=>{dummy.position.set(p.x,height(p.x,p.z)+.02,p.z);dummy.rotation.set(0,rng()*Math.PI*2,0);dummy.scale.setScalar(p.scale);dummy.updateMatrix();mesh.setMatrixAt(i,dummy.matrix);mesh.setColorAt(i,p.c);});mesh.instanceMatrix.needsUpdate=true;mesh.instanceColor!.needsUpdate=true;mesh.receiveShadow=true;mesh.name=['Tulips','Lavender','Cosmos','Golden daisies'][k];mesh.userData.max=selected.length;mesh.userData.simple=mesh.geometry;mesh.userData.detail=flowerGeometry(k,true);mesh.computeBoundingSphere();this.flowers.push(mesh);this.group.add(mesh);}
  }
  createTrees(){
   const b=new Batch(),rng=random(722),dummy=new T.Object3D();const clusterCount=trees.length*35;
   const canopyGeo=new T.SphereGeometry(1,16,10);const canopy=new T.InstancedMesh(canopyGeo,toon('#ffffff'),clusterCount);let ci=0;
-  const small=new T.InstancedMesh(blossomGeometry(),toon('#ffffff'),trees.length*190);let si=0;
+  const blossomMat=toon('#ffffff');blossomMat.side=T.DoubleSide;const small=new T.InstancedMesh(blossomGeometry(),blossomMat,trees.length*190);let si=0;
   for(let index=0;index<trees.length;index++){
    const [x,z]=trees[index],y=height(x,z),h=1.05+rng()*.65,s=.74+rng()*.34;
    b.beam(mats.wood,[x,y,z],[x+.1,y+h,z],.075*s);
+   for(let j=0;j<4;j++){const a=j*Math.PI*.5+index*.7;const xx=x+Math.cos(a)*.26*s,zz=z+Math.sin(a)*.26*s;b.beam(mats.wood,[x,y+.17,z],[xx,height(xx,zz)+.025,zz],.035*s);}
    for(let j=0;j<6;j++){const a=j/6*Math.PI*2+.3,xx=x+Math.cos(a)*.65*s,zz=z+Math.sin(a)*.65*s;b.beam(mats.wood,[x+.06,y+h*.65,z],[xx,y+h+.27,zz],.037*s);b.beam(mats.wood,[xx,y+h+.27,zz],[xx+Math.cos(a)*.25,y+h+.48,zz+Math.sin(a)*.25],.018);}
    for(let j=0;j<35;j++){const a=rng()*Math.PI*2,r=Math.sqrt(rng())*.95*s,yy=y+h+.35+(1-r)*.34;dummy.position.set(x+Math.cos(a)*r,yy+(rng()-.5)*.3,z+Math.sin(a)*r);dummy.scale.set(.22+rng()*.17,.085+rng()*.09,.22+rng()*.16);dummy.rotation.set(rng(),rng()*6,rng());dummy.updateMatrix();canopy.setMatrixAt(ci,dummy.matrix);canopy.setColorAt(ci,new T.Color(['#ee94b6','#f9b6ca','#e980ab','#f7c2d2'][Math.floor(rng()*4)]));ci++;}
-   for(let j=0;j<190;j++){const a=rng()*Math.PI*2,r=Math.sqrt(rng())*1.02*s,yy=y+h+.43+(1-r)*.35;dummy.position.set(x+Math.cos(a)*r,yy+(rng()-.5)*.3,z+Math.sin(a)*r);dummy.scale.set(.045+rng()*.04,.035,.045+rng()*.04);dummy.updateMatrix();small.setMatrixAt(si,dummy.matrix);small.setColorAt(si,new T.Color(j%4?'#ffc8d8':'#ee8eb2'));si++;}
+   for(let j=0;j<190;j++){const a=rng()*Math.PI*2,r=Math.sqrt(rng())*1.02*s,yy=y+h+.43+(1-r)*.35;dummy.position.set(x+Math.cos(a)*r,yy+(rng()-.5)*.3,z+Math.sin(a)*r);dummy.rotation.set((rng()-.5)*.8,rng()*Math.PI*2,(rng()-.5)*.8);dummy.scale.set(.045+rng()*.04,.035,.045+rng()*.04);dummy.updateMatrix();small.setMatrixAt(si,dummy.matrix);small.setColorAt(si,new T.Color(j%4?'#ffc8d8':'#ee8eb2'));si++;}
   }
   canopy.castShadow=true;canopy.receiveShadow=true;canopy.name='Layered cherry blossom crowns';small.name='Cherry blossom clusters';small.receiveShadow=true;this.group.add(b.flush('Cherry trunks and branches'),canopy,small);
  }
