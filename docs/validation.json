@@ -1,9 +1,10 @@
 {
-  "started": "2026-10-19T14:27:36.148Z",
+  "started": "2026-10-22T16:48:41.376Z",
   "browser": "154.0.8037.57",
   "checks": [
     "real WebGL diorama with dense planting and complete architecture",
-    "hero composition contains island rim, Fuji and deep rock underside",
+    "hero composition contains expanded rim, cherry crowns, Fuji and rock underside",
+    "water and three-dimensional petals animate while the day clock is paused",
     "continuous day-night controls and exact endpoints",
     "independent rain, snow, ground response and remembered intensity",
     "automatic cycle crosses midnight and manual scrubbing pauses it",
@@ -11,6 +12,7 @@
     "mouse orbit, zoom, pan and slow automatic orbit",
     "quality presets change actual instance and weather budgets",
     "fullscreen, hidden UI and viewport resize",
+    "expanded island remains visible on a portrait phone viewport",
     "actual self-contained HTML, complete offline ZIP and editable source downloads",
     "zero-network standalone rendering with day, rain, snow and camera interactions"
   ],
@@ -26,28 +28,33 @@
       "playing": false,
       "night": 0,
       "sunIntensity": 2.6,
-      "elapsed": 179.4566999999972,
-      "fps": 0.7,
+      "elapsed": 73.98847200000003,
+      "fps": 0.1,
       "dpr": 0.65,
       "flowers": 6498,
-      "trees": 29,
+      "trees": 47,
       "buildings": 9,
       "largeBuildings": 3,
       "smallBuildings": 6,
       "bridges": 2,
       "torii": 2,
       "waterfalls": 3,
-      "drawCalls": 42,
-      "triangles": 1590708,
+      "waterTime": 73.98847200000003,
+      "petalTime": 73.98847200000003,
+      "petals": 160,
+      "reflectionCaptures": 14,
+      "cameraMoving": false,
+      "drawCalls": 47,
+      "triangles": 1723652,
       "camera": [
-        16.855983890530542,
-        13.917050575833354,
-        29.619006707152693
+        17.205615529112386,
+        13.44156097405985,
+        29.679668336341226
       ],
       "target": [
-        0.23055514048602718,
-        -1.2117826536234597,
-        0.4691606699524679
+        0.3510786541448808,
+        -1.613692545605819,
+        0.6234482072715264
       ],
       "zoom": 1,
       "view": "hero",
@@ -62,8 +69,233 @@
   ],
   "limitations": [
     "Linux SwiftShader cannot establish Windows discrete-GPU performance. Windows launcher execution is not available in this environment.",
-    "Enterprise Chromium blocks file://. The exact standalone HTML was loaded into about:blank in an offline browser context; actual Windows file opening remains unverified."
+    "Fixed buttons are activated through DOM click after visibility and enabled checks because SwiftShader stalls Playwright stable-frame waits. Fullscreen uses a forced trusted click; orbit, zoom and pan retain actual mouse input.",
+    "Seven checks passed in the initial final-build run. After correcting a fixed 1800 ms auto-orbit test wait for SwiftShader, the mouse check and remaining checks ran in a fresh browser; all business code remained unchanged.",
+    "Enterprise Chromium blocks file://. The exact standalone HTML was loaded into about:blank in an offline browser context; actual Windows file opening remains unverified.",
+    "The final canvas resize/render ordering correction followed the 13 feature checks and was verified separately in the latest standalone HTML through a real DPR 1 to 0.65 change. Both screenshots visibly contain the complete scene; no animation pause or gl.finish workaround was used."
   ],
+  "resumedAfterSlowFrameWait": true,
+  "initialRunStarted": "2026-10-22T16:41:21.498Z",
   "success": true,
-  "finished": "2026-10-19T14:34:33.422Z"
+  "finished": "2026-10-22T16:57:18.706Z",
+  "supplementalChecks": [
+    {
+      "started": "2026-10-22T17:02:38.550Z",
+      "standalone": "release/sakura-dream-offline.html",
+      "sha256": "a9c77099f3d198776adaa44b1ebeb13c1cdc0e1a62b74d0e27bdfc536a531e8d",
+      "offline": true,
+      "errors": [],
+      "requests": [],
+      "method": "Unmodified standalone HTML in an offline browser context; normal animation continues; CDP captures before and after adaptive DPR changes. No requestAnimationFrame interception or gl.finish workaround.",
+      "before": {
+        "weather": "sun",
+        "intensity": 0.65,
+        "quality": "medium",
+        "uiVisible": true,
+        "time": 10.5,
+        "playing": false,
+        "night": 0,
+        "sunIntensity": 2.6,
+        "elapsed": 2.2791019999997206,
+        "fps": 0.9,
+        "dpr": 1,
+        "flowers": 10999,
+        "trees": 47,
+        "buildings": 9,
+        "largeBuildings": 3,
+        "smallBuildings": 6,
+        "bridges": 2,
+        "torii": 2,
+        "waterfalls": 3,
+        "waterTime": 2.2791019999997206,
+        "petalTime": 2.2791019999997206,
+        "petals": 300,
+        "reflectionCaptures": 2,
+        "cameraMoving": false,
+        "drawCalls": 91,
+        "triangles": 3198488,
+        "camera": [
+          17.364970704876626,
+          13.382678837213378,
+          29.622597084789543
+        ],
+        "target": [
+          0.3649707048766263,
+          -1.617321162786619,
+          0.6225970847895391
+        ],
+        "zoom": 1,
+        "view": "hero",
+        "orbit": false,
+        "rainVisible": false,
+        "snowVisible": false,
+        "particles": 0,
+        "snowCover": 0,
+        "wetness": 0,
+        "renderer": "WebKit WebGL",
+        "visibility": "visible"
+      },
+      "afterFirstCapture": {
+        "weather": "sun",
+        "intensity": 0.65,
+        "quality": "medium",
+        "uiVisible": true,
+        "time": 10.5,
+        "playing": false,
+        "night": 0,
+        "sunIntensity": 2.6,
+        "elapsed": 8.279101999999721,
+        "fps": 0.2,
+        "dpr": 0.7000000000000001,
+        "flowers": 10999,
+        "trees": 47,
+        "buildings": 9,
+        "largeBuildings": 3,
+        "smallBuildings": 6,
+        "bridges": 2,
+        "torii": 2,
+        "waterfalls": 3,
+        "waterTime": 8.279101999999721,
+        "petalTime": 8.279101999999721,
+        "petals": 300,
+        "reflectionCaptures": 3,
+        "cameraMoving": false,
+        "drawCalls": 61,
+        "triangles": 2297530,
+        "camera": [
+          17.364970704876626,
+          13.382678837213378,
+          29.622597084789543
+        ],
+        "target": [
+          0.3649707048766263,
+          -1.617321162786619,
+          0.6225970847895391
+        ],
+        "zoom": 1,
+        "view": "hero",
+        "orbit": false,
+        "rainVisible": false,
+        "snowVisible": false,
+        "particles": 0,
+        "snowCover": 0,
+        "wetness": 0,
+        "renderer": "WebKit WebGL",
+        "visibility": "visible"
+      },
+      "after": {
+        "weather": "sun",
+        "intensity": 0.65,
+        "quality": "medium",
+        "uiVisible": true,
+        "time": 10.5,
+        "playing": false,
+        "night": 0,
+        "sunIntensity": 2.6,
+        "elapsed": 14.312401999999723,
+        "fps": 0.3,
+        "dpr": 0.65,
+        "flowers": 10999,
+        "trees": 47,
+        "buildings": 9,
+        "largeBuildings": 3,
+        "smallBuildings": 6,
+        "bridges": 2,
+        "torii": 2,
+        "waterfalls": 3,
+        "waterTime": 14.312401999999723,
+        "petalTime": 14.312401999999723,
+        "petals": 300,
+        "reflectionCaptures": 5,
+        "cameraMoving": false,
+        "drawCalls": 61,
+        "triangles": 2297530,
+        "camera": [
+          17.364970704876626,
+          13.382678837213378,
+          29.622597084789543
+        ],
+        "target": [
+          0.3649707048766263,
+          -1.617321162786619,
+          0.6225970847895391
+        ],
+        "zoom": 1,
+        "view": "hero",
+        "orbit": false,
+        "rainVisible": false,
+        "snowVisible": false,
+        "particles": 0,
+        "snowCover": 0,
+        "wetness": 0,
+        "renderer": "WebKit WebGL",
+        "visibility": "visible"
+      },
+      "projectedBounds": [
+        [
+          -0.6541013643872409,
+          0.49410092481926915,
+          -0.7572814987211554
+        ],
+        [
+          0.6541013643872415,
+          -0.0058962705704017895,
+          -0.8277104387476208
+        ],
+        [
+          -0.32968832404970283,
+          -0.12258359558141832,
+          -0.8441468601732345
+        ],
+        [
+          0.32968832404970344,
+          0.6107882498302857,
+          -0.7408450772955416
+        ],
+        [
+          0.13298111024416231,
+          0.8345942084862761,
+          -0.7766496125087491
+        ],
+        [
+          3.028878946473016e-16,
+          -0.32061214642911784,
+          -0.7766573765245383
+        ]
+      ],
+      "success": true,
+      "finished": "2026-10-22T17:04:59.713Z",
+      "images": [
+        {
+          "path": "test-results/sakura-offline-before-dpr.png",
+          "dimensions": [
+            1280,
+            800
+          ],
+          "centerRgbStdDev": [
+            55.27695417954094,
+            46.629241439190196,
+            51.37874173699944
+          ],
+          "sceneVisibleConfirmed": true
+        },
+        {
+          "path": "test-results/sakura-offline.png",
+          "dimensions": [
+            1280,
+            800
+          ],
+          "centerRgbStdDev": [
+            54.535508953752036,
+            45.89253074872452,
+            50.62192616621423
+          ],
+          "sceneVisibleConfirmed": true
+        }
+      ],
+      "featureCheckBuild": "online index-B-LzWUMX.js / offline index-Bjt05X3C.js",
+      "finalRenderCheckBuild": "online index-Cz4M08pq.js / offline index-CjN-j5R2.js",
+      "name": "latest standalone scene remains visible through adaptive DPR changes"
+    }
+  ]
 }
