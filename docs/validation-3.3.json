@@ -115,5 +115,73 @@
     "errors": [],
     "checkedAt": "2026-10-28T16:12:44.373Z"
   },
-  "visualCheckTimingNote": "视觉检查阶段1.2秒未出现新帧；animationValidation通过等待实际新帧单独验证动画推进。"
+  "visualCheckTimingNote": "视觉检查阶段1.2秒未出现新帧；animationValidation通过等待实际新帧单独验证动画推进。",
+  "offlineValidation": {
+    "artifact": "/workspace/gpt-3D/release/sakura-dream-offline.html",
+    "offline": true,
+    "viewport": {
+      "width": 480,
+      "height": 320
+    },
+    "quality": "low",
+    "success": true,
+    "errors": [],
+    "httpRequests": [],
+    "fileLoadingLimitation": "Error: page.goto: net::ERR_BLOCKED_BY_ADMINISTRATOR at file:///workspace/gpt-3D/release/sakura-dream-offline.html",
+    "loadingMethod": "exact standalone HTML via setContent in offline context",
+    "firstWaterTime": 0.8037999999999302,
+    "nextWaterTime": 6.80379999999993,
+    "waterTimeDelta": 5.999999999999999,
+    "timeSlider": 10.5,
+    "playing": false,
+    "snapshot": {
+      "weather": "sun",
+      "intensity": 0.65,
+      "quality": "low",
+      "uiVisible": true,
+      "time": 10.5,
+      "playing": false,
+      "night": 0,
+      "sunIntensity": 2.6,
+      "elapsed": 6.80379999999993,
+      "fps": 0.2,
+      "dpr": 0.7000000000000001,
+      "flowers": 6498,
+      "trees": 47,
+      "buildings": 9,
+      "largeBuildings": 3,
+      "smallBuildings": 6,
+      "bridges": 2,
+      "torii": 2,
+      "waterfalls": 3,
+      "tokyoTower": 1,
+      "waterTime": 6.80379999999993,
+      "petalTime": 6.80379999999993,
+      "petals": 160,
+      "reflectionCaptures": 0,
+      "cameraMoving": false,
+      "drawCalls": 56,
+      "triangles": 1733268,
+      "camera": [
+        19.17353593548159,
+        13.368202499364482,
+        28.56989143470158
+      ],
+      "target": [
+        2.1735359354815866,
+        -1.6317975006355148,
+        -0.43010856529842234
+      ],
+      "zoom": 1,
+      "view": "hero",
+      "orbit": false,
+      "rainVisible": false,
+      "snowVisible": false,
+      "particles": 0,
+      "snowCover": 0,
+      "wetness": 0,
+      "renderer": "WebKit WebGL"
+    },
+    "checkedAt": "2026-10-28T16:15:04.649Z"
+  }
 }
