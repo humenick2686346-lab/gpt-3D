@@ -6,6 +6,8 @@ import {inside,plantable,waterAt,mountainAt,random,buildings,trees,qualityConfig
 import {createIsland} from '../src/world/Island.ts';
 import {createMountain} from '../src/world/Mountain.ts';
 import {createArchitecture} from '../src/world/Architecture.ts';
+import {createTokyoTower,towerPosition,towerExtent} from '../src/world/TokyoTower.ts';
+import {createWater} from '../src/world/Water.ts';
 import {Vegetation} from '../src/world/Vegetation.ts';
 
 test('continuous day cycle, midnight seam, slider endpoints and pause behavior',()=>{
@@ -36,4 +38,43 @@ test('expanded rim remains plantable and supports new cherry groves',()=>{
  let outerGarden=0;for(let i=0;i<96;i++){const a=i/96*Math.PI*2,x=Math.cos(a)*islandRadiusX*.84*edge(a),z=Math.sin(a)*islandRadiusZ*.84*edge(a);assert.ok(inside(x,z));assert.ok(Number.isFinite(height(x,z)));if(plantable(x,z))outerGarden++;}
  assert.ok(outerGarden>60,`outer garden samples ${outerGarden}`);
  assert.ok(trees.filter(([x,z])=>Math.hypot(x/10,z/8.6)>1).length>=12);
+});
+
+test('Tokyo Tower has a real detailed structure on its separate floating rock base',()=>{
+ const tower=createTokyoTower(),bounds=new T.Box3().setFromObject(tower.group),size=bounds.getSize(new T.Vector3());
+ assert.ok(bounds.max.y>towerPosition.y+towerExtent.height*.98&&bounds.max.y<towerPosition.y+towerExtent.height*1.02,'tower reaches its declared antenna height');
+ assert.ok(bounds.min.y<towerPosition.y-towerExtent.baseDepth*.9,'floating rock base extends beneath the tower');
+ assert.ok(size.x>towerExtent.radius*1.6&&size.x<towerExtent.radius*2.2);
+ assert.ok(size.z>towerExtent.radius*1.6&&size.z<towerExtent.radius*2.2);
+ assert.ok(Math.abs(bounds.getCenter(new T.Vector3()).x-towerPosition.x)<.2);
+ assert.ok(Math.abs(bounds.getCenter(new T.Vector3()).z-towerPosition.z)<.2);
+ let triangles=0;tower.group.traverse(o=>{if(o.isMesh)triangles+=(o.geometry.index?.count??o.geometry.attributes.position.count)/3*(o.isInstancedMesh?o.count:1);});
+ assert.ok(triangles>2000,`detailed tower geometry has ${triangles} triangles`);
+});
+
+test('all three stream lips meet their waterfall inlets with continuous waves and flow',()=>{
+ const water=createWater(),tolerance=1e-5;water.group.updateMatrixWorld(true);
+ const row=(mesh,attribute,extreme)=>{
+  const phase=mesh.geometry.getAttribute(attribute),flow=mesh.geometry.getAttribute('flowDirection'),positions=mesh.geometry.getAttribute('position');
+  assert.ok(phase&&flow&&positions,`${mesh.name} has inlet attributes`);
+  const values=Array.from({length:phase.count},(_,i)=>phase.getY(i)),level=extreme(...values),indices=[];
+  for(let i=0;i<phase.count;i++)if(Math.abs(phase.getY(i)-level)<tolerance)indices.push(i);
+  const across=new T.Vector3(flow.getY(indices[0]),0,-flow.getX(indices[0]));
+  return indices.map(i=>({i,position:new T.Vector3().fromBufferAttribute(positions,i).applyMatrix4(mesh.matrixWorld)})).sort((a,b)=>a.position.dot(across)-b.position.dot(across));
+ };
+ try{for(let number=1;number<=3;number++){
+  const channel=water.group.getObjectByName(`Water channel ${number}`),fall=water.group.getObjectByName(`Waterfall ${number} · continuous curved sheet`);
+  assert.ok(channel?.isMesh&&fall?.isMesh,`channel and waterfall ${number} exist`);
+  const tail=row(channel,'waterData',Math.max),inlet=row(fall,'uv',Math.min);
+  assert.ok(tail.length>=3);assert.equal(tail.length,inlet.length,`waterfall ${number} inlet resolution matches`);
+  const sourceWidth=tail.at(-1).position.clone().sub(tail[0].position),inletWidth=inlet.at(-1).position.clone().sub(inlet[0].position);
+  assert.ok(sourceWidth.distanceTo(inletWidth)<tolerance,`waterfall ${number} lip width and orientation match`);
+  for(let j=0;j<tail.length;j++){
+   assert.ok(tail[j].position.distanceTo(inlet[j].position)<tolerance,`waterfall ${number}, inlet vertex ${j} closes in world space and height`);
+   for(const [source,target]of [['waterData','fallData'],['flowDirection','flowDirection']])for(const component of ['getX','getY']){
+    const upstream=channel.geometry.getAttribute(source)[component](tail[j].i),downstream=fall.geometry.getAttribute(target)[component](inlet[j].i);
+    assert.ok(Math.abs(upstream-downstream)<tolerance,`waterfall ${number}, inlet vertex ${j}, ${source}.${component} is continuous`);
+   }
+  }
+ }}finally{water.dispose();}
 });

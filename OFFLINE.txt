@@ -1,4 +1,4 @@
-樱梦浮岛 · 富士花境 / Sakura Dream — Floating Island 3.2
+樱梦浮岛 · 富士花境 / Sakura Dream — Floating Island 3.3
 
 1. 解压完整 ZIP（不要直接在压缩软件里打开）。
 2. 双击 index.html，用最新版 Windows Chrome 或 Edge 浏览器打开。
