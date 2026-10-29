@@ -5,7 +5,8 @@ import {UnrealBloomPass} from 'three/addons/postprocessing/UnrealBloomPass.js';
 import {OutputPass} from 'three/addons/postprocessing/OutputPass.js';
 import {createIsland} from './world/Island.ts';
 import {createMountain} from './world/Mountain.ts';
-import {createTokyoTower} from './world/TokyoTower.ts';
+import {createShanghaiIsland} from './world/Shanghai.ts';
+import {createBambooBridge} from './world/BambooBridge.ts';
 import {Vegetation} from './world/Vegetation.ts';
 import {createArchitecture} from './world/Architecture.ts';
 import {createWater} from './world/Water.ts';
@@ -22,17 +23,17 @@ const ui=createUI();ui.el('reload').onclick=()=>location.reload();
 try{start(new T.WebGLRenderer({antialias:true,powerPreference:'high-performance'}));}catch(error){console.error(error);ui.fatal('浏览器无法创建 WebGL 2 场景。请启用硬件加速，并使用最新版 Chrome 或 Edge。');}
 function start(renderer:T.WebGLRenderer){
  renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.13;renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;renderer.shadowMap.autoUpdate=false;
- const canvas=renderer.domElement;canvas.tabIndex=0;canvas.setAttribute('aria-label','樱梦浮岛：鼠标拖动旋转，滚轮缩放，右键平移');ui.el('scene').append(canvas);
+ const canvas=renderer.domElement;canvas.tabIndex=0;canvas.setAttribute('aria-label','樱梦双岛：富士花境、浦东天际线与 U 型竹桥；鼠标拖动旋转，滚轮缩放，右键平移');ui.el('scene').append(canvas);
  const state={weather:'sun' as Weather,intensity:.65,quality:'medium' as Quality,uiVisible:true};const intensities={rain:.65,snow:.65};
- const scene=new T.Scene(),camera=new T.OrthographicCamera(-20,20,12,-12,.1,350);const env=new Environment(scene),time=new TimeController();
- const island=createIsland(),mountain=createMountain(),vegetation=new Vegetation(state.quality),architecture=createArchitecture(),water=createWater(),tokyoTower=createTokyoTower();scene.add(island,mountain,vegetation.group,architecture.group,water.group,tokyoTower.group);
+ const scene=new T.Scene(),camera=new T.OrthographicCamera(-20,20,12,-12,.1,650);const env=new Environment(scene),time=new TimeController();
+ const island=createIsland(),mountain=createMountain(),vegetation=new Vegetation(state.quality),architecture=createArchitecture(),water=createWater(),shanghai=createShanghaiIsland(),bambooBridge=createBambooBridge();scene.add(island,mountain,vegetation.group,architecture.group,water.group,shanghai.group,bambooBridge.group);
  const weather=new WeatherSystem(scene,state.quality),rig=new CameraController(camera,canvas);
  const composer=new EffectComposer(renderer);composer.addPass(new RenderPass(scene,camera));const bloom=new UnrealBloomPass(new T.Vector2(innerWidth,innerHeight),.18,.45,1.05);composer.addPass(bloom);composer.addPass(new OutputPass());
  let dpr=1,elapsed=0,fps=0,frames=0,frameTime=0,last=performance.now(),lost=false,disposed=false,adaptTime=0,drawCalls=0,triangles=0;
  const cleanups:(()=>void)[]=[];function on(target:EventTarget,type:string,fn:(e:any)=>void){target.addEventListener(type,fn);cleanups.push(()=>target.removeEventListener(type,fn));}
  function resize(){renderer.setPixelRatio(dpr);renderer.setSize(innerWidth,innerHeight);composer.setPixelRatio(dpr);composer.setSize(innerWidth,innerHeight);rig.resize();}
  function setQuality(q:Quality){state.quality=q;const c=qualityConfig[q];vegetation.setQuality(q);weather.setQuality(q);water.setQuality(q);dpr=Math.min(devicePixelRatio,c.dpr);env.sun.shadow.mapSize.set(c.shadow,c.shadow);env.sun.shadow.map?.dispose();env.sun.shadow.map=null;renderer.shadowMap.needsUpdate=true;bloom.enabled=c.bloom;ui.el<HTMLSelectElement>('quality').value=q;resize();}
- function applyTime(){const s=env.apply(time.hour,state.weather,state.intensity);architecture.setNight(s.night);tokyoTower.setNight(s.night);uniforms.wet.value=state.weather==='rain'?state.intensity:0;uniforms.snow.value=state.weather==='snow'?state.intensity*.68:0;ui.time(time.hour);renderer.shadowMap.needsUpdate=true;}
+ function applyTime(){const s=env.apply(time.hour,state.weather,state.intensity);architecture.setNight(s.night);shanghai.setNight(s.night);bambooBridge.setNight(s.night);uniforms.wet.value=state.weather==='rain'?state.intensity:0;uniforms.snow.value=state.weather==='snow'?state.intensity*.68:0;ui.time(time.hour);renderer.shadowMap.needsUpdate=true;}
  function selectWeather(mode:Weather){if(state.weather!=='sun')intensities[state.weather]=state.intensity;state.weather=mode;state.intensity=mode==='sun'?.65:intensities[mode];weather.set(mode,state.intensity);ui.weather(mode,state.intensity);applyTime();}
  function togglePlay(){time.playing=!time.playing;ui.play(time.playing);}
  function toggleUI(visible=!state.uiVisible){state.uiVisible=visible;ui.el('interface').inert=!visible;document.body.classList.toggle('ui-hidden',!visible);ui.el('show-ui').hidden=visible;if(!visible)ui.el('show-ui').focus();}
@@ -55,11 +56,11 @@ function start(renderer:T.WebGLRenderer){
  // Resizing after a draw clears the finished canvas; adapt before painting this frame.
  frames++;frameTime+=wallDelta;
  if(frameTime>=1){fps=Number((frames/frameTime).toFixed(1));frames=0;adaptTime+=frameTime;frameTime=0;ui.el('performance').textContent=`${fps} FPS · ${Math.round(dpr*100)}% 分辨率`;if(adaptTime>=5){adaptTime=0;const cap=Math.min(devicePixelRatio,qualityConfig[state.quality].dpr);const next=fps<35?Math.max(.65,dpr-.1):fps>57?Math.min(cap,dpr+.05):dpr;if(Math.abs(next-dpr)>.01){dpr=next;renderer.setPixelRatio(dpr);renderer.setSize(innerWidth,innerHeight);composer.setPixelRatio(dpr);composer.setSize(innerWidth,innerHeight);}}}
- if(time.playing){time.update(dt);applyTime();}rig.update(dt);vegetation.updateLOD(camera.zoom);uniforms.time.value=elapsed;env.update(elapsed);weather.update(elapsed,dpr);water.update(elapsed,env.day,state.weather==='rain'?state.intensity:0,env.horizon,env.sun.position,env.sun.color);
+ if(time.playing){time.update(dt);applyTime();}rig.update(dt);vegetation.updateLOD(camera.zoom);uniforms.time.value=elapsed;env.update(elapsed);weather.update(elapsed,dpr);shanghai.update(elapsed);water.update(elapsed,env.day,state.weather==='rain'?state.intensity:0,env.horizon,env.sunDirection,env.sun.color);
  renderer.info.reset();water.capture(renderer,scene,camera,[weather.rain,weather.snow,...vegetation.flowers]);if(qualityConfig[state.quality].bloom)composer.render();else renderer.render(scene,camera);drawCalls=renderer.info.render.calls;triangles=renderer.info.render.triangles;
  });
  requestAnimationFrame(()=>requestAnimationFrame(()=>ui.loaded()));
- const diagnostics={snapshot:()=>({...state,time:time.hour,playing:time.playing,night:env.night,sunIntensity:env.sun.intensity,elapsed,fps,dpr,flowers:vegetation.count,trees:vegetation.cherryCount,...architecture.counts,waterfalls:3,tokyoTower:1,waterTime:water.uniforms.time.value,petalTime:weather.uniforms.time.value,petals:weather.petals.geometry.instanceCount,reflectionCaptures:water.reflection.captures,cameraMoving:rig.moving,drawCalls,triangles,camera:camera.position.toArray(),target:rig.controls.target.toArray(),zoom:camera.zoom,view:rig.view,orbit:rig.controls.autoRotate,rainVisible:weather.rain.visible,snowVisible:weather.snow.visible,particles:state.weather==='sun'?0:Math.floor(weather.max*state.intensity),snowCover:uniforms.snow.value,wetness:uniforms.wet.value,renderer:renderer.getContext().getParameter(renderer.getContext().RENDERER)}),project:(p:number[])=>new T.Vector3(...p).project(camera).toArray()};
+ const diagnostics={snapshot:()=>({...state,time:time.hour,playing:time.playing,night:env.night,sunIntensity:env.sun.intensity,elapsed,fps,dpr,flowers:vegetation.count,trees:vegetation.cherryCount,...architecture.counts,waterfalls:3,islands:2,tokyoTower:0,shanghai:shanghai.counts,interIslandBridges:1,waterTime:water.uniforms.time.value,petalTime:weather.uniforms.time.value,petals:weather.petals.geometry.instanceCount,reflectionCaptures:water.reflection.captures,cameraMoving:rig.moving,drawCalls,triangles,camera:camera.position.toArray(),target:rig.controls.target.toArray(),zoom:camera.zoom,view:rig.view,orbit:rig.controls.autoRotate,rainVisible:weather.rain.visible,snowVisible:weather.snow.visible,particles:state.weather==='sun'?0:Math.floor(weather.max*state.intensity),snowCover:uniforms.snow.value,wetness:uniforms.wet.value,renderer:renderer.getContext().getParameter(renderer.getContext().RENDERER)}),project:(p:number[])=>new T.Vector3(...p).project(camera).toArray()};
  (window as any).__SAKURA__=diagnostics;
  on(window,'pagehide',e=>{if(e.persisted)return;disposed=true;renderer.setAnimationLoop(null);cleanups.forEach(f=>f());rig.dispose();water.dispose();composer.dispose();bloom.dispose();const geoms=new Set<T.BufferGeometry>(),materials=new Set<T.Material>();scene.traverse(o=>{if(o instanceof T.Mesh||o instanceof T.Points||o instanceof T.LineSegments){geoms.add(o.geometry);if(Array.isArray(o.material))o.material.forEach(m=>materials.add(m));else materials.add(o.material);}});geoms.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());env.sun.shadow.map?.dispose();renderer.dispose();delete(window as any).__SAKURA__;});
 }

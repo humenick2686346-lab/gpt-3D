@@ -6,7 +6,8 @@ import {pathToFileURL} from 'node:url';
 import path from 'node:path';
 import {unzipSync,strFromU8} from 'fflate';
 import {trees,edge,height,islandRadiusX,islandRadiusZ} from '../src/world/layout.ts';
-import {towerPosition,towerExtent} from '../src/world/TokyoTower.ts';
+import {shanghaiPosition,shanghaiExtent} from '../src/world/Shanghai.ts';
+import {bridgeExtent} from '../src/world/BambooBridge.ts';
 await access('dist/index.html');await mkdir('test-results',{recursive:true});
 const url='http://127.0.0.1:4173';let server;
 try{await fetch(url);}catch{server=spawn(process.execPath,['node_modules/vite/bin/vite.js','preview','--host','127.0.0.1','--port','4173','--strictPort'],{stdio:'ignore'});}
@@ -22,8 +23,8 @@ async function check(name,fn){console.log('RUN ',name);await fn();report.checks.
 async function download(p,id,name){const event=p.waitForEvent('download');await click(p,id);const d=await event;const file=path.resolve('test-results',name||d.suggestedFilename());await d.saveAs(file);return file;}
 async function ready(p){await p.waitForFunction(()=>window.__SAKURA__,null,{timeout:90000});await p.locator('#loading').waitFor({state:'detached',timeout:90000});}
 const rim=Array.from({length:96},(_,i)=>{const a=i/96*Math.PI*2,x=Math.cos(a)*islandRadiusX*edge(a),z=Math.sin(a)*islandRadiusZ*edge(a);return [x,height(x,z),z];});
-const towerBounds=[-1,1].flatMap(x=>[-1,1].flatMap(z=>[-towerExtent.baseDepth,towerExtent.height].map(y=>[towerPosition.x+x*towerExtent.radius,towerPosition.y+y,towerPosition.z+z*towerExtent.radius])));
-const compositionPoints=[...rim,...towerBounds,...trees.map(([x,z])=>[x,height(x,z)+2.4,z]),[-.6,5.8,-5.65],[0,-5.8,0]];
+const cityBounds=Array.from({length:96},(_,i)=>i/96*Math.PI*2).flatMap(a=>[-shanghaiExtent.baseDepth,0].map(y=>[shanghaiPosition.x+Math.cos(a)*shanghaiExtent.radiusX,y,shanghaiPosition.z+Math.sin(a)*shanghaiExtent.radiusZ]));
+const compositionPoints=[...rim,...cityBounds,[shanghaiPosition.x-3.1,shanghaiExtent.height,1.65],bridgeExtent.min,bridgeExtent.max,...trees.map(([x,z])=>[x,height(x,z)+2.4,z]),[-.6,5.8,-5.65],[0,-5.8,0]];
 async function composition(p=page){const projected=await p.evaluate(points=>points.map(point=>window.__SAKURA__.project(point)),compositionPoints);for(const point of projected)assert.ok(Math.abs(point[0])<.98&&Math.abs(point[1])<.98,`clipped composition point ${JSON.stringify(point)}`);}
 async function settled(p=page){await p.waitForFunction(()=>!window.__SAKURA__.snapshot().cameraMoving,null,{polling:100});}
 const screenshotSessions=new WeakMap();
@@ -32,9 +33,9 @@ async function capture(p,file){let client=screenshotSessions.get(p);if(!client){
 
 try{
  await page.goto(url);await ready(page);
- await check('real WebGL diorama with dense planting and complete architecture',async()=>{const s=await snap();assert.equal(s.buildings,9);assert.equal(s.tokyoTower,1);assert.equal(s.trees,trees.length);assert.equal(s.bridges,2);assert.equal(s.waterfalls,3);assert.ok(s.flowers>10990);assert.ok(s.drawCalls>25);assert.ok(s.triangles>100000);assert.equal(await page.locator('#fatal').isVisible(),false);});
+ await check('real WebGL diorama with dense planting and complete architecture',async()=>{const s=await snap();assert.equal(s.buildings,9);assert.equal(s.tokyoTower,0);assert.equal(s.islands,2);assert.equal(s.shanghai.orientalPearl,1);assert.equal(s.interIslandBridges,1);assert.equal(s.trees,trees.length);assert.equal(s.bridges,2);assert.equal(s.waterfalls,3);assert.ok(s.flowers>10990);assert.ok(s.drawCalls>25);assert.ok(s.triangles>100000);assert.equal(await page.locator('#fatal').isVisible(),false);});
  if(process.env.SAKURA_REUSE_HERO!=='1')await capture(page,'test-results/sakura-hero.png');
- await check('hero composition contains expanded rim, cherry crowns, Fuji, Tokyo Tower and both rock bases',async()=>{await composition();});
+ await check('hero composition contains expanded rim, cherry crowns, Fuji, Shanghai skyline, bridge and both rock bases',async()=>{await composition();});
  await check('water and three-dimensional petals animate while the day clock is paused',async()=>{const before=await snap();assert.equal(before.playing,false);assert.ok(before.petals>0);await page.waitForFunction(start=>{const s=window.__SAKURA__.snapshot();return s.waterTime>start.waterTime+.1&&s.petalTime>start.petalTime+.1;},before);const after=await snap();assert.equal(after.time,before.time);assert.ok(Math.abs(after.waterTime-after.elapsed)<.001);assert.ok(Math.abs(after.petalTime-after.elapsed)<.001);});
  await check('continuous day-night controls and exact endpoints',async()=>{await range(page,'#time',12);assert.ok((await snap()).sunIntensity>2);await range(page,'#time',0);assert.ok((await snap()).night>.99);await range(page,'#time',24);assert.equal(await page.locator('#time-output').textContent(),'24:00');await range(page,'#time',22);});
 

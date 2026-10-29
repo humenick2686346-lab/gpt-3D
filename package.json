@@ -1,9 +1,9 @@
 {
   "name": "sakura-dream-floating-island",
-  "version": "3.3.0",
+  "version": "3.4.0",
   "private": true,
   "type": "module",
-  "description": "An original procedural Japanese fantasy diorama, with flowers, shrines, flowing water and a living sky.",
+  "description": "A procedural twin-island world connecting a Fuji sakura garden and a miniature Shanghai skyline with a curved bamboo bridge.",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build": "tsc --noEmit && vite build && vite build --config vite.offline.config.js && node scripts/package.mjs",

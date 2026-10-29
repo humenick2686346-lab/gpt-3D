@@ -6,7 +6,8 @@ import {inside,plantable,waterAt,mountainAt,random,buildings,trees,qualityConfig
 import {createIsland} from '../src/world/Island.ts';
 import {createMountain} from '../src/world/Mountain.ts';
 import {createArchitecture} from '../src/world/Architecture.ts';
-import {createTokyoTower,towerPosition,towerExtent} from '../src/world/TokyoTower.ts';
+import {createShanghaiIsland,shanghaiPosition} from '../src/world/Shanghai.ts';
+import {createBambooBridge,bridgePath,bridgeAnchors} from '../src/world/BambooBridge.ts';
 import {createWater} from '../src/world/Water.ts';
 import {Vegetation} from '../src/world/Vegetation.ts';
 
@@ -40,16 +41,10 @@ test('expanded rim remains plantable and supports new cherry groves',()=>{
  assert.ok(trees.filter(([x,z])=>Math.hypot(x/10,z/8.6)>1).length>=12);
 });
 
-test('Tokyo Tower has a real detailed structure on its separate floating rock base',()=>{
- const tower=createTokyoTower(),bounds=new T.Box3().setFromObject(tower.group),size=bounds.getSize(new T.Vector3());
- assert.ok(bounds.max.y>towerPosition.y+towerExtent.height*.98&&bounds.max.y<towerPosition.y+towerExtent.height*1.02,'tower reaches its declared antenna height');
- assert.ok(bounds.min.y<towerPosition.y-towerExtent.baseDepth*.9,'floating rock base extends beneath the tower');
- assert.ok(size.x>towerExtent.radius*1.6&&size.x<towerExtent.radius*2.2);
- assert.ok(size.z>towerExtent.radius*1.6&&size.z<towerExtent.radius*2.2);
- assert.ok(Math.abs(bounds.getCenter(new T.Vector3()).x-towerPosition.x)<.2);
- assert.ok(Math.abs(bounds.getCenter(new T.Vector3()).z-towerPosition.z)<.2);
- let triangles=0;tower.group.traverse(o=>{if(o.isMesh)triangles+=(o.geometry.index?.count??o.geometry.attributes.position.count)/3*(o.isInstancedMesh?o.count:1);});
- assert.ok(triangles>2000,`detailed tower geometry has ${triangles} triangles`);
+test('Shanghai island matches Fuji in scale, contains landmarks and joins a U-shaped bamboo bridge',()=>{
+ const city=createShanghaiIsland(),bounds=new T.Box3().setFromObject(city.group),size=bounds.getSize(new T.Vector3());
+ assert.ok(size.x>25&&size.x<30);assert.ok(size.z>21&&size.z<25);assert.ok(bounds.min.y<-5);assert.ok(bounds.max.y>10);assert.equal(city.counts.orientalPearl,1);assert.equal(city.counts.shanghaiLandmarks,4);
+ const bridge=createBambooBridge();assert.ok(bridge.counts.deckSlats>100);assert.ok(bridge.counts.lanterns>0);assert.ok(bridgePath.getPoint(0).distanceTo(bridgeAnchors.fuji)<1e-6);assert.ok(bridgePath.getPoint(1).distanceTo(bridgeAnchors.shanghai)<1e-6);assert.ok(bridgePath.getPoint(.5).z>18);assert.ok(shanghaiPosition.x>30);city.setNight(1);city.update(10);bridge.setNight(1);
 });
 
 test('all three stream lips meet their waterfall inlets with continuous waves and flow',()=>{

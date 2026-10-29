@@ -33,18 +33,18 @@ export class WeatherSystem{
  uniforms={time:{value:0},pixelRatio:{value:1},day:{value:1}};
  constructor(scene:T.Scene,q:Quality){
   this.group.name='Rain, snow and windborne sakura petals';
-  const rng=random(79),count=qualityConfig.high.particles,p=new Float32Array(count*6),seed=new Float32Array(count*2);
+  const rng=random(79),count=qualityConfig.high.particles*2,p=new Float32Array(count*6),seed=new Float32Array(count*2);
   for(let i=0;i<count;i++){
-   const x=(rng()-.5)*31,y=rng()*17,z=(rng()-.5)*28;
+   const x=18+(rng()-.5)*70,y=rng()*23,z=3+(rng()-.5)*38;
    p.set([x,y,z,x-.075,y+.45,z+.02],i*6);seed[i*2]=seed[i*2+1]=rng();
   }
   const g=new T.BufferGeometry();g.setAttribute('position',new T.BufferAttribute(p,3));g.setAttribute('seed',new T.BufferAttribute(seed,1));
-  const rainMat=new T.ShaderMaterial({transparent:true,depthWrite:false,uniforms:this.uniforms,vertexShader:`uniform float time;attribute float seed;varying float vA;void main(){vec3 p=position;p.y=mod(p.y-time*(9.+seed*3.),17.)-3.;p.x+=sin(time*.2)*.5;vA=.24+seed*.2;gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.);}`,fragmentShader:`varying float vA;void main(){gl_FragColor=vec4(.68,.84,1.,vA);}`});
+  const rainMat=new T.ShaderMaterial({transparent:true,depthWrite:false,uniforms:this.uniforms,vertexShader:`uniform float time;attribute float seed;varying float vA;void main(){vec3 p=position;p.y=mod(p.y-time*(9.+seed*3.),23.)-3.;p.x+=sin(time*.2)*.5;vA=.24+seed*.2;gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.);}`,fragmentShader:`varying float vA;void main(){gl_FragColor=vec4(.68,.84,1.,vA);}`});
   this.rain=new T.LineSegments(g,rainMat);this.rain.frustumCulled=false;
   const sg=new T.BufferGeometry(),sp=new Float32Array(count*3),ss=new Float32Array(count);
   for(let i=0;i<count;i++){sp.set([p[i*6],p[i*6+1],p[i*6+2]],i*3);ss[i]=seed[i*2];}
   sg.setAttribute('position',new T.BufferAttribute(sp,3));sg.setAttribute('seed',new T.BufferAttribute(ss,1));
-  const snowMat=new T.ShaderMaterial({transparent:true,depthWrite:false,uniforms:this.uniforms,vertexShader:`uniform float time,pixelRatio;attribute float seed;varying float vA;void main(){vec3 p=position;p.y=mod(p.y-time*(.4+seed*.8),17.)-3.;p.x+=sin(time*.5+seed*80.+p.y*.3)*.6;p.z+=cos(time*.35+seed*60.)*.4;vA=.6+seed*.3;gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.);gl_PointSize=(2.+seed*3.)*pixelRatio;}`,fragmentShader:`varying float vA;void main(){float a=1.-smoothstep(.2,.5,length(gl_PointCoord-.5));gl_FragColor=vec4(.94,.97,1.,a*vA);}`});
+  const snowMat=new T.ShaderMaterial({transparent:true,depthWrite:false,uniforms:this.uniforms,vertexShader:`uniform float time,pixelRatio;attribute float seed;varying float vA;void main(){vec3 p=position;p.y=mod(p.y-time*(.4+seed*.8),23.)-3.;p.x+=sin(time*.5+seed*80.+p.y*.3)*.6;p.z+=cos(time*.35+seed*60.)*.4;vA=.6+seed*.3;gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.);gl_PointSize=(2.+seed*3.)*pixelRatio;}`,fragmentShader:`varying float vA;void main(){float a=1.-smoothstep(.2,.5,length(gl_PointCoord-.5));gl_FragColor=vec4(.94,.97,1.,a*vA);}`});
   this.snow=new T.Points(sg,snowMat);this.snow.frustumCulled=false;
 
   const pg=petalGeometry(),petalCount=petalBudgets.high;
@@ -110,7 +110,7 @@ export class WeatherSystem{
   this.petals=new T.Mesh(pg,pm);this.petals.name='Cupped, tumbling sakura petals';this.petals.frustumCulled=false;
   this.group.add(this.rain,this.snow,this.petals);scene.add(this.group);this.setQuality(q);this.set('sun',.65);
  }
- setQuality(q:Quality){this.max=qualityConfig[q].particles;this.petalBudget=petalBudgets[q];this.set(this.mode,this.intensity);}
+ setQuality(q:Quality){this.max=qualityConfig[q].particles*2;this.petalBudget=petalBudgets[q];this.set(this.mode,this.intensity);}
  set(mode:Weather,intensity:number){
   this.mode=mode;this.intensity=intensity;
   this.rain.visible=mode==='rain'&&intensity>0;this.snow.visible=mode==='snow'&&intensity>0;

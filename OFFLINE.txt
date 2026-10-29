@@ -1,4 +1,8 @@
-樱梦浮岛 · 富士花境 / Sakura Dream — Floating Island 3.3
+樱梦双岛 · 富士与浦东 / Sakura Dream — Twin Islands 3.4
+
+
+双岛世界：富士山樱花岛、等尺度的上海浦东微缩岛与 U 型竹桥。
+东方明珠、上海中心、环球金融中心、金茂大厦和滨水街区随昼夜点亮。
 
 1. 解压完整 ZIP（不要直接在压缩软件里打开）。
 2. 双击 index.html，用最新版 Windows Chrome 或 Edge 浏览器打开。
