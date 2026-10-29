@@ -1,4 +1,8 @@
-樱梦浮岛 · 富士花境 / Sakura Dream — Floating Island 3.1
+樱梦三岛 · 云上奇境 / Sakura Dream — Three Islands 3.5
+
+
+三岛世界：富士山樱花岛、上海浦东微缩岛与埃及沙漠岛；富士与浦东以 U 型竹桥相连。
+东方明珠、上海中心、环球金融中心、金茂大厦和滨水街区随昼夜点亮。
 
 1. 解压完整 ZIP（不要直接在压缩软件里打开）。
 2. 双击 index.html，用最新版 Windows Chrome 或 Edge 浏览器打开。
