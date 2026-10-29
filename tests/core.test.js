@@ -9,6 +9,7 @@ import {createArchitecture} from '../src/world/Architecture.ts';
 import {createShanghaiIsland,shanghaiPosition} from '../src/world/Shanghai.ts';
 import {createBambooBridge,bridgePath,bridgeAnchors} from '../src/world/BambooBridge.ts';
 import {createWater} from '../src/world/Water.ts';
+import {createEgyptIsland,egyptPosition} from '../src/world/Egypt.ts';
 import {Vegetation} from '../src/world/Vegetation.ts';
 
 test('continuous day cycle, midnight seam, slider endpoints and pause behavior',()=>{
@@ -45,6 +46,22 @@ test('Shanghai island matches Fuji in scale, contains landmarks and joins a U-sh
  const city=createShanghaiIsland(),bounds=new T.Box3().setFromObject(city.group),size=bounds.getSize(new T.Vector3());
  assert.ok(size.x>25&&size.x<30);assert.ok(size.z>21&&size.z<25);assert.ok(bounds.min.y<-5);assert.ok(bounds.max.y>10);assert.equal(city.counts.orientalPearl,1);assert.equal(city.counts.shanghaiLandmarks,4);
  const bridge=createBambooBridge();assert.ok(bridge.counts.deckSlats>100);assert.ok(bridge.counts.lanterns>0);assert.ok(bridgePath.getPoint(0).distanceTo(bridgeAnchors.fuji)<1e-6);assert.ok(bridgePath.getPoint(1).distanceTo(bridgeAnchors.shanghai)<1e-6);assert.ok(bridgePath.getPoint(.5).z>18);assert.ok(shanghaiPosition.x>30);city.setNight(1);city.update(10);bridge.setNight(1);
+});
+
+test('Egypt island has a separate deep sandstone body, real pyramids and an animated oasis',()=>{
+ const egypt=createEgyptIsland(),bounds=new T.Box3().setFromObject(egypt.group),size=bounds.getSize(new T.Vector3());
+ assert.ok(size.x>24&&size.x<29,`Egypt width ${size.x}`);assert.ok(size.z>20&&size.z<25,`Egypt depth ${size.z}`);
+ assert.ok(bounds.min.y<-5&&bounds.max.y>6,`Egypt elevation ${bounds.min.y} to ${bounds.max.y}`);
+ assert.ok(bounds.max.z<-islandRadiusZ-4,'Egypt island is clearly separated from the Fuji island');
+ assert.ok(Math.abs(bounds.getCenter(new T.Vector3()).x-egyptPosition.x)<1);
+ assert.equal(egypt.counts.pyramids,3);assert.equal(egypt.counts.sphinx,1);assert.equal(egypt.counts.oases,1);assert.ok(egypt.counts.palms>=6);
+ const rock=egypt.group.getObjectByName('Egypt · layered sandstone cliffs'),oasis=egypt.group.getObjectByName('Egypt · oasis water'),pyramid=egypt.group.getObjectByName('Egypt · Great Pyramid');
+ assert.ok(rock?.isMesh&&rock.geometry.attributes.position.count>100,'sandstone cliffs have real geometry');
+ assert.ok(oasis?.isMesh&&oasis.geometry.attributes.position.count>20,'oasis has real geometry');
+ assert.ok(pyramid,'Great Pyramid is part of the scene');
+ const pyramidBounds=new T.Box3().setFromObject(pyramid);assert.ok(pyramidBounds.max.y-pyramidBounds.min.y>4,'pyramid is a three-dimensional structure');
+ const waterUniforms=oasis.material.uniforms;assert.ok(waterUniforms?.time&&waterUniforms?.night,'oasis has water animation and light uniforms');
+ egypt.update(12);assert.equal(waterUniforms.time.value,12);egypt.setNight(1);assert.equal(waterUniforms.night.value,1);egypt.setNight(0);assert.equal(waterUniforms.night.value,0);
 });
 
 test('all three stream lips meet their waterfall inlets with continuous waves and flow',()=>{
