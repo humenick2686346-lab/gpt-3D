@@ -11,6 +11,9 @@ import {createBambooBridge,bridgePath,bridgeAnchors} from '../src/world/BambooBr
 import {createWater} from '../src/world/Water.ts';
 import {createEgyptIsland,egyptPosition} from '../src/world/Egypt.ts';
 import {Vegetation} from '../src/world/Vegetation.ts';
+import {createFranceIsland,francePosition} from '../src/world/France.ts';
+import {createIslandLinks,linkPaths,linkDeckWidth} from '../src/world/IslandLinks.ts';
+import {frameScene,framingPoints,viewDirections,targetBounds} from '../src/controllers/CameraController.ts';
 
 test('continuous day cycle, midnight seam, slider endpoints and pause behavior',()=>{
  assert.equal(formatTime(24),'24:00');assert.equal(formatTime(17.25),'17:15');assert.deepEqual(calculateTime(0),calculateTime(24));
@@ -62,6 +65,49 @@ test('Egypt island has a separate deep sandstone body, real pyramids and an anim
  const pyramidBounds=new T.Box3().setFromObject(pyramid);assert.ok(pyramidBounds.max.y-pyramidBounds.min.y>4,'pyramid is a three-dimensional structure');
  const waterUniforms=oasis.material.uniforms;assert.ok(waterUniforms?.time&&waterUniforms?.night,'oasis has water animation and light uniforms');
  egypt.update(12);assert.equal(waterUniforms.time.value,12);egypt.setNight(1);assert.equal(waterUniforms.night.value,1);egypt.setNight(0);assert.equal(waterUniforms.night.value,0);
+});
+
+test('French island has real Paris landmarks, a passable arch and animated fountain',()=>{
+ const france=createFranceIsland(),bounds=new T.Box3().setFromObject(france.group),size=bounds.getSize(new T.Vector3());
+ assert.ok(size.x>24&&size.x<28);assert.ok(size.z>20&&size.z<24);assert.ok(bounds.min.y<-5);assert.ok(bounds.max.y>11);
+ assert.ok(Math.abs(bounds.getCenter(new T.Vector3()).x-francePosition.x)<1);assert.ok(bounds.max.x<egyptPosition.x-15,'France is separate from Egypt');
+ assert.equal(france.counts.eiffelTower,1);assert.equal(france.counts.arcDeTriomphe,1);assert.ok(france.counts.buildings>=8);
+ const tower=france.group.getObjectByName('France · Eiffel Tower'),arch=france.group.getObjectByName('France · Arc de Triomphe'),fountain=france.group.getObjectByName('France · fountain water');
+ assert.ok(tower&&arch?.isMesh&&fountain?.isMesh);const towerBox=new T.Box3().setFromObject(tower);assert.ok(towerBox.max.y-towerBox.min.y>10);
+ france.group.updateMatrixWorld(true);
+ const opening=new T.Vector3(0,1,3).applyMatrix4(arch.matrixWorld),pier=new T.Vector3(1.3,1,3).applyMatrix4(arch.matrixWorld),ray=new T.Raycaster(opening,new T.Vector3(0,0,-1),0,6);
+ assert.equal(ray.intersectObject(arch).length,0,'the arch opening is physically empty');ray.set(pier,new T.Vector3(0,0,-1));assert.ok(ray.intersectObject(arch).length>0,'the arch has actual supporting piers');
+ const lightLevels=()=>{const a=[];france.group.traverse(o=>{if(o.isMesh&&o.material.emissive)a.push(o.material.emissiveIntensity);});return a.reduce((a,b)=>a+b,0);};
+ const daylight=lightLevels();france.setNight(1);assert.ok(lightLevels()>daylight+1);assert.equal(fountain.material.uniforms.night.value,1);france.update(21);assert.equal(fountain.material.uniforms.time.value,21);
+});
+
+test('all four islands form a connected circuit with continuous bridge decks',()=>{
+ const links=createIslandLinks(),edges=[['fuji','shanghai'],...linkPaths.map(l=>[l.from,l.to])],visited=new Set(['fuji']);
+ for(let i=0;i<edges.length;i++)for(const[a,b]of edges)if(visited.has(a)||visited.has(b)){visited.add(a);visited.add(b);}
+ assert.deepEqual([...visited].sort(),['egypt','france','fuji','shanghai']);assert.equal(new Set(edges.map(e=>e.slice().sort().join(':'))).size,4);
+ assert.equal(links.counts.bridges,3);links.group.updateMatrixWorld(true);
+ for(const link of linkPaths){
+  const mesh=links.group.getObjectByName(`Inter-island bridge · ${link.id} · continuous deck`);assert.ok(mesh?.isMesh);
+  const positions=mesh.geometry.getAttribute('position'),endIndex=positions.count-4;
+  const center=i=>new T.Vector3().fromBufferAttribute(positions,i).add(new T.Vector3().fromBufferAttribute(positions,i+1)).multiplyScalar(.5);
+  assert.ok(center(0).distanceTo(link.start)<1e-5);assert.ok(center(endIndex).distanceTo(link.end)<1e-5);
+  const width=new T.Vector3().fromBufferAttribute(positions,0).distanceTo(new T.Vector3().fromBufferAttribute(positions,1));assert.ok(Math.abs(width-linkDeckWidth)<1e-5);
+  for(let i=1;i<20;i++){
+   const point=link.curve.getPointAt(i/20),ray=new T.Raycaster(point.clone().add(new T.Vector3(0,2,0)),new T.Vector3(0,-1,0),0,3),hits=ray.intersectObject(mesh);
+   assert.ok(hits.length>0,`${link.id} deck is walkable at ${i}/20`);assert.ok(Math.abs(hits[0].point.y-point.y)<.04);
+  }
+ }
+});
+
+test('four-island cameras contain the full world on desktop and mobile',()=>{
+ for(const [width,height]of [[900,640],[1600,1000],[390,844]])for(const [view,coordinates]of Object.entries(viewDirections)){
+  const direction=new T.Vector3(...coordinates),fit=frameScene(direction,width,height),camera=new T.OrthographicCamera(-fit.span*width/height/2,fit.span*width/height/2,fit.span/2,-fit.span/2,.1,650);
+  camera.position.copy(direction).add(fit.target);camera.lookAt(fit.target);camera.updateMatrixWorld(true);camera.updateProjectionMatrix();
+  for(const axis of ['x','y','z'])assert.ok(fit.target[axis]>=targetBounds[axis][0]&&fit.target[axis]<=targetBounds[axis][1],`${view} fitted target must not be moved by the navigation clamp`);
+  for(const point of framingPoints()){
+   const projected=point.clone().project(camera);assert.ok(Math.abs(projected.x)<.99&&Math.abs(projected.y)<.99&&Math.abs(projected.z)<1,`${width}x${height} ${view}: clipped ${point.toArray()}`);
+  }
+ }
 });
 
 test('all three stream lips meet their waterfall inlets with continuous waves and flow',()=>{
