@@ -2,7 +2,7 @@ import * as T from 'three';
 import {Batch,toon} from './materials.ts';
 import {height} from './layout.ts';
 
-export type IslandId='fuji'|'france'|'egypt'|'shanghai';
+export type IslandId='fuji'|'france'|'egypt'|'shanghai'|'australia';
 export const linkDeckWidth=1.44;
 function link(id:string,from:IslandId,to:IslandId,a:number[],b:number[],bow:number){
  const start=new T.Vector3(...a),end=new T.Vector3(...b),side=new T.Vector3(end.z-start.z,0,start.x-end.x).normalize();
@@ -12,19 +12,21 @@ function link(id:string,from:IslandId,to:IslandId,a:number[],b:number[],bow:numb
  return {id,from,to,start,end,curve:new T.CatmullRomCurve3(points,false,'centripetal')};
 }
 // Landings extend into the dry ground. The original U bridge supplies the
-// fourth edge, Fuji–Shanghai, so the four destinations form a walkable loop.
+// Fuji–Shanghai edge; Sydney extends the circuit with two eastern connections.
 export const linkPaths=[
  link('fuji-france','fuji','france',[-5.1,height(-5.1,-9.8)+.08,-9.8],[-12.5,.65,-24.7],-.7),
  link('france-egypt','france','egypt',[-6.8,.65,-33],[7.5,.63,-35.2],.7),
  link('egypt-shanghai','egypt','shanghai',[24,.63,-26],[30.5,.66,-8.8],.8),
+ link('egypt-australia','egypt','australia',[29.1,.63,-34],[42.7,.67,-33],.45),
+ link('australia-shanghai','australia','shanghai',[48,.67,-24.5],[41.5,.66,-8.6],-.7),
 ];
 const bounds=new T.Box3();for(const link of linkPaths)for(const p of link.curve.getPoints(100))bounds.expandByPoint(p);
 bounds.min.add(new T.Vector3(-1.2,-1.8,-1.2));bounds.max.add(new T.Vector3(1.2,2.25,1.2));
 export const linksExtent={min:bounds.min.toArray(),max:bounds.max.toArray()};
 
-/** Three continuous arched promenades complete the four-island circuit. */
+/** Continuous arched promenades connect all five floating destinations. */
 export function createIslandLinks(){
- const group=new T.Group();group.name='Four islands · connecting garden bridges';
+ const group=new T.Group();group.name='Five islands · connecting garden bridges';
  const structure=new Batch();
  const wood=toon('#b9a080'),stone=toon('#c6bc9f'),paleStone=toon('#ded0ad');
  const iron=toon('#536d70'),gold=toon('#bba66b');

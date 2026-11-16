@@ -5,16 +5,17 @@ import {shanghaiPosition,shanghaiExtent} from '../world/Shanghai.ts';
 import {bridgeExtent} from '../world/BambooBridge.ts';
 import {egyptPosition,egyptExtent} from '../world/Egypt.ts';
 import {francePosition,franceExtent} from '../world/France.ts';
+import {australiaPosition,australiaExtent} from '../world/Australia.ts';
 import {linksExtent} from '../world/IslandLinks.ts';
 export type View='hero'|'front'|'top'|'side';
 export const viewDirections:Record<View,[number,number,number]>={hero:[12,32,54],front:[0,24,70],top:[.01,80,.01],side:[90,22,.02]};
-export const targetBounds={x:[-35,55],y:[-30,30],z:[-52,25]};
+export const targetBounds={x:[-35,75],y:[-30,30],z:[-52,25]};
 export function framingPoints(){
  const points:T.Vector3[]=[];
  for(let i=0;i<96;i++){const a=i/96*Math.PI*2;for(const [r,y]of [[1,0],[.9,-2],[.5,-4.5]]){const x=Math.cos(a)*islandRadiusX*edge(a)*r,z=Math.sin(a)*islandRadiusZ*edge(a)*r;points.push(new T.Vector3(x,y===0?height(x,z):y,z));}}
  for(const[x,z]of trees)points.push(new T.Vector3(x,height(x,z)+2.4,z));
  points.push(new T.Vector3(-.6,5.8,-5.65),new T.Vector3(-5.7,4.9,-2.4),new T.Vector3(streamX(streamEndZ)+.2,-6.1,streamEndZ+.85),new T.Vector3(eastOutletX+.85,-6.1,-3.4),new T.Vector3(westFall.x-.55,-6.1,westFall.z+.65));
- for(const [position,extent]of [[shanghaiPosition,shanghaiExtent],[egyptPosition,egyptExtent],[francePosition,franceExtent]] as const){
+ for(const [position,extent]of [[shanghaiPosition,shanghaiExtent],[egyptPosition,egyptExtent],[francePosition,franceExtent],[australiaPosition,australiaExtent]] as const){
   for(let i=0;i<96;i++){const a=i/96*Math.PI*2;for(const [scale,y]of [[1,0],[1,-extent.baseDepth],[.55,extent.height]])points.push(new T.Vector3(position.x+Math.cos(a)*extent.radiusX*scale,position.y+y,position.z+Math.sin(a)*extent.radiusZ*scale));}
  }
  for(const bounds of [bridgeExtent,linksExtent])for(const x of [bounds.min[0],bounds.max[0]])for(const z of [bounds.min[2],bounds.max[2]])for(const y of [bounds.min[1],bounds.max[1]])points.push(new T.Vector3(x,y,z));

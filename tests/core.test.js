@@ -12,6 +12,7 @@ import {createWater} from '../src/world/Water.ts';
 import {createEgyptIsland,egyptPosition} from '../src/world/Egypt.ts';
 import {Vegetation} from '../src/world/Vegetation.ts';
 import {createFranceIsland,francePosition} from '../src/world/France.ts';
+import {createAustraliaIsland,australiaPosition,australiaExtent} from '../src/world/Australia.ts';
 import {createIslandLinks,linkPaths,linkDeckWidth} from '../src/world/IslandLinks.ts';
 import {frameScene,framingPoints,viewDirections,targetBounds} from '../src/controllers/CameraController.ts';
 
@@ -81,11 +82,11 @@ test('French island has real Paris landmarks, a passable arch and animated fount
  const daylight=lightLevels();france.setNight(1);assert.ok(lightLevels()>daylight+1);assert.equal(fountain.material.uniforms.night.value,1);france.update(21);assert.equal(fountain.material.uniforms.time.value,21);
 });
 
-test('all four islands form a connected circuit with continuous bridge decks',()=>{
+test('all five islands form a connected circuit with continuous bridge decks',()=>{
  const links=createIslandLinks(),edges=[['fuji','shanghai'],...linkPaths.map(l=>[l.from,l.to])],visited=new Set(['fuji']);
  for(let i=0;i<edges.length;i++)for(const[a,b]of edges)if(visited.has(a)||visited.has(b)){visited.add(a);visited.add(b);}
- assert.deepEqual([...visited].sort(),['egypt','france','fuji','shanghai']);assert.equal(new Set(edges.map(e=>e.slice().sort().join(':'))).size,4);
- assert.equal(links.counts.bridges,3);links.group.updateMatrixWorld(true);
+ assert.deepEqual([...visited].sort(),['australia','egypt','france','fuji','shanghai']);assert.equal(new Set(edges.map(e=>e.slice().sort().join(':'))).size,6);
+ assert.equal(links.counts.bridges,5);links.group.updateMatrixWorld(true);
  for(const link of linkPaths){
   const mesh=links.group.getObjectByName(`Inter-island bridge · ${link.id} · continuous deck`);assert.ok(mesh?.isMesh);
   const positions=mesh.geometry.getAttribute('position'),endIndex=positions.count-4;
@@ -99,7 +100,7 @@ test('all four islands form a connected circuit with continuous bridge decks',()
  }
 });
 
-test('four-island cameras contain the full world on desktop and mobile',()=>{
+test('five-island cameras contain the full world on desktop and mobile',()=>{
  for(const [width,height]of [[900,640],[1600,1000],[390,844]])for(const [view,coordinates]of Object.entries(viewDirections)){
   const direction=new T.Vector3(...coordinates),fit=frameScene(direction,width,height),camera=new T.OrthographicCamera(-fit.span*width/height/2,fit.span*width/height/2,fit.span/2,-fit.span/2,.1,650);
   camera.position.copy(direction).add(fit.target);camera.lookAt(fit.target);camera.updateMatrixWorld(true);camera.updateProjectionMatrix();
@@ -135,4 +136,35 @@ test('all three stream lips meet their waterfall inlets with continuous waves an
    }
   }
  }}finally{water.dispose();}
+});
+
+test('Sydney has curved Opera House shells, an open harbour bridge and a moving ferry',()=>{
+ const city=createAustraliaIsland(),box=new T.Box3().setFromObject(city.group),size=box.getSize(new T.Vector3());
+ assert.ok(size.x>24&&size.x<27);assert.ok(size.z>20&&size.z<23);assert.ok(box.min.y<-5&&box.max.y>10);
+ assert.ok(box.max.x<australiaPosition.x+australiaExtent.radiusX);assert.ok(box.min.x>australiaPosition.x-australiaExtent.radiusX);
+ const opera=city.group.getObjectByName('Australia · Sydney Opera House'),bridge=city.group.getObjectByName('Australia · Sydney Harbour Bridge'),tower=city.group.getObjectByName('Australia · Sydney Tower Eye'),water=city.group.getObjectByName('Australia · moving Sydney harbour'),boat=city.group.getObjectByName('Australia · harbour ferry');
+ assert.ok(opera&&bridge&&tower&&water?.isMesh&&boat);assert.ok(new T.Box3().setFromObject(opera).getSize(new T.Vector3()).y>5);
+ const shells=opera.children.find(o=>o.material.customProgramCacheKey()==='sydney-ceramic-roof-v1'),pos=shells?.geometry.getAttribute('position');
+ assert.ok(pos?.count>5000,'shells are tessellated surfaces');for(const n of pos.array)assert.ok(Number.isFinite(n),'shell vertices must be finite');
+ city.group.updateMatrixWorld(true);
+ // A horizontal ray below the road must cross the shipping channel unhindered.
+ const ray=new T.Raycaster(new T.Vector3(australiaPosition.x-7,1.1,australiaPosition.z+5.4),new T.Vector3(1,0,0),0,4.5);
+ assert.equal(ray.intersectObject(bridge,true).length,0,'the channel beneath the deck stays open');
+ const initial=boat.position.clone();city.update(30);assert.ok(boat.position.distanceTo(initial)>.5);assert.equal(water.material.uniforms.time.value,30);
+ const levels=()=>{let n=0;city.group.traverse(o=>{if(o.isMesh&&o.material.emissive)n+=o.material.emissiveIntensity;});return n;};
+ for(let t=0;t<115;t+=2){city.update(t);const radius=Math.hypot(boat.position.x/12.4,(boat.position.z-.2)/10.4);assert.ok(radius>.63&&radius<.83,'the ferry stays between both harbour quays');}
+ city.update(0);const loopStart=boat.position.clone();city.update(2*Math.PI/.055);assert.ok(Math.hypot(boat.position.x-loopStart.x,boat.position.z-loopStart.z)<1e-6,'the ferry route closes without reversing');
+ const day=levels();city.setNight(1);assert.ok(levels()>day+1);assert.equal(water.material.uniforms.night.value,1);
+});
+
+test('both Sydney connections have dry land beneath the full width of each landing',()=>{
+ const islands={australia:createAustraliaIsland().group,egypt:createEgyptIsland().group,shanghai:createShanghaiIsland().group};
+ for(const island of Object.values(islands))island.updateMatrixWorld(true);
+ for(const link of linkPaths.filter(l=>l.from==='australia'||l.to==='australia'))for(const [id,t]of [[link.from,0],[link.to,1]]){
+  const p=link.curve.getPointAt(t),direction=link.curve.getTangentAt(t),across=new T.Vector3(direction.z,0,-direction.x).normalize();
+  for(const offset of [-linkDeckWidth/2,0,linkDeckWidth/2]){
+   const start=p.clone().addScaledVector(across,offset).add(new T.Vector3(0,.15,0)),ray=new T.Raycaster(start,new T.Vector3(0,-1,0),0,.4),hits=ray.intersectObject(islands[id],true);
+   assert.ok(hits.length>0,`${link.id} ${id} landing ${offset} rests on the island`);assert.ok(!/water|harbour|oasis/i.test(hits[0].object.name),'bridge arrival must be dry');
+  }
+ }
 });
